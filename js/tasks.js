@@ -46,7 +46,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // 3. 업무 추가/수정 모달 제어
+    // 3. 업무 추가/수정 모달 제어 (CSS 트랜지션 완벽 연동)
     function openModal(mode = 'create', taskData = null) {
         if (!taskModal) return;
         if (taskForm) taskForm.reset();
@@ -60,7 +60,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (document.getElementById('task-title-input')) document.getElementById('task-title-input').value = taskData.title;
             if (document.getElementById('task-desc-input')) document.getElementById('task-desc-input').value = taskData.description || '';
             
-            // 💡 ID 기반 다이렉트 매핑으로 안전성 확보
+            // 💡 교정 완료: 명확한 ID 기반 다이렉트 매핑 처리로 실시간 풀림 방지
             if (assigneeSelect) {
                 assigneeSelect.value = taskData.assignedTo ? taskData.assignedTo.toString() : '';
             }
@@ -69,11 +69,18 @@ document.addEventListener('DOMContentLoaded', () => {
             if (taskModalTitle) taskModalTitle.textContent = '업무 추가';
             if (document.getElementById('task-status-input')) document.getElementById('task-status-input').value = 'Todo';
         }
+        
+        // CSS 클래스와 디스플레이 타이밍 일치화
         taskModal.style.display = 'flex';
+        setTimeout(() => taskModal.classList.add('active'), 10);
     }
 
     function closeModal() {
-        if (taskModal) taskModal.style.display = 'none';
+        if (!taskModal) return;
+        taskModal.classList.remove('active');
+        setTimeout(() => {
+            taskModal.style.display = 'none';
+        }, 250); // CSS transition 시간(0.25s) 동기화
     }
 
     if (addTaskBtn) addTaskBtn.addEventListener('click', () => openModal('create'));
