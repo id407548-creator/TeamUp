@@ -69,13 +69,34 @@ document.addEventListener('DOMContentLoaded', () => {
     // 팀 생성
     if (createTeamForm) {
         createTeamForm.addEventListener('submit', (e) => {
-            e.preventDefault();
+    e.preventDefault();
 
-            hideModalError();
+    const name =
+        document.getElementById('team-name').value.trim();
 
-            const name = createTeamForm.name.value.trim();
-            const subject = createTeamForm.subject.value.trim();
-            const description = createTeamForm.description.value.trim();
+    const subject =
+        document.getElementById('team-subject').value.trim();
+
+    const description =
+        document.getElementById('team-description').value.trim();
+
+    console.log(name, subject, description);
+
+    const result = StorageDB.createTeam(
+        name,
+        subject,
+        description
+    );
+
+    console.log(result);
+
+    if (result.success) {
+        closeModal();
+        loadTeams();
+    } else {
+        showModalError(result.message);
+    }
+});
 
             if (!name || !subject) {
                 showModalError('팀 이름과 과목명을 입력해주세요.');
