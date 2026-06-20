@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
-    console.log("tasks.js 최종 버전 가동 (StorageDB 완전 연동)");
+    console.log("tasks.js 최종 버전 가동 (StorageDB 완전 연동 - 싱크 교정판)");
 
     // URL에서 team id 가져오기
     const urlParams = new URLSearchParams(window.location.search);
@@ -29,7 +29,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const assigneeSelect = document.getElementById('task-assignee-input');
     const memberAvatarsContainer = document.getElementById('team-members-avatars');
 
-    // 추가 기능 버튼 및 탭 바인딩
     const inviteMemberBtn = document.getElementById('invite-member-btn');
     const tabButtons = document.querySelectorAll('.tab-btn');
     const tasksSection = document.getElementById('tasks-section');
@@ -58,19 +57,17 @@ document.addEventListener('DOMContentLoaded', () => {
         if (mode === 'edit' && taskData) {
             if (taskModalTitle) taskModalTitle.textContent = '업무 수정';
             if (idInput) idInput.value = taskData.id;
-            document.getElementById('task-title-input').value = taskData.title;
-            document.getElementById('task-desc-input').value = taskData.description || '';
+            if (document.getElementById('task-title-input')) document.getElementById('task-title-input').value = taskData.title;
+            if (document.getElementById('task-desc-input')) document.getElementById('task-desc-input').value = taskData.description || '';
             
-            // 💡 배정 담당자 매핑 처리 보완
+            // 💡 ID 기반 다이렉트 매핑으로 안전성 확보
             if (assigneeSelect) {
-                // 이름으로 일치하는 option 찾아서 가치 할당
-                const matchedOption = Array.from(assigneeSelect.options).find(opt => opt.text.startsWith(taskData.assignee_name));
-                assigneeSelect.value = matchedOption ? matchedOption.value : '';
+                assigneeSelect.value = taskData.assignedTo ? taskData.assignedTo.toString() : '';
             }
-            document.getElementById('task-status-input').value = taskData.status;
+            if (document.getElementById('task-status-input')) document.getElementById('task-status-input').value = taskData.status;
         } else {
             if (taskModalTitle) taskModalTitle.textContent = '업무 추가';
-            document.getElementById('task-status-input').value = 'Todo';
+            if (document.getElementById('task-status-input')) document.getElementById('task-status-input').value = 'Todo';
         }
         taskModal.style.display = 'flex';
     }
@@ -97,14 +94,14 @@ document.addEventListener('DOMContentLoaded', () => {
                     const res = StorageDB.inviteMemberToTeam(TEAM_ID, memberIdInput);
                     alert(res.message);
                     if (res.success) {
-                        loadTeamMembers(); // 아바타 및 셀렉트 박스 리프레시
+                        loadTeamMembers(); 
                     }
                 }
             }
         });
     }
 
-    // 5. 탭 메뉴 클릭 시 전환 및 타 스크립트 트리거 유기적 연결
+    // 5. 탭 메뉴 클릭 시 전환 제어
     tabButtons.forEach(button => {
         button.addEventListener('click', (e) => {
             tabButtons.forEach(btn => {
@@ -121,7 +118,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const clickedTabName = button.textContent.trim();
             
-            // 전역 블록 구조 제어
             const schedulesSec = document.getElementById('schedules-section');
             const filesSec = document.getElementById('files-section');
 
@@ -144,7 +140,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // 6. 팀 멤버 실제 데이터 목록화 (StorageDB 엔진 연동)
+    // 6. 팀 멤버 로드 및 아바타 출력
     function loadTeamMembers() {
         if (typeof StorageDB !== 'undefined') {
             const result = StorageDB.getTeamMembers(TEAM_ID);
@@ -154,7 +150,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     assigneeSelect.innerHTML = '<option value="">담당자 없음 (미정)</option>';
                     members.forEach(member => {
                         const option = document.createElement('option');
-                        option.value = member.id; // User 고유 고유 ID 부여
+                        option.value = member.id; 
                         option.textContent = `${member.displayName} (${member.role === 'creator' ? '팀장' : '팀원'})`;
                         assigneeSelect.appendChild(option);
                     });
@@ -183,12 +179,12 @@ document.addEventListener('DOMContentLoaded', () => {
             avatar.style.border = '2px solid #fff';
             avatar.style.marginLeft = index > 0 ? '-8px' : '0px';
             avatar.title = `${member.displayName} (${member.role === 'creator' ? '팀장' : '팀원'})`;
-            avatar.textContent = member.displayName.charAt(0);
+            avatar.textContent = member.displayName ? member.displayName.charAt(0) : 'U';
             memberAvatarsContainer.appendChild(avatar);
         });
     }
 
-    // 7. 업무 통합 저장/조회 핵심 로직 (StorageDB 완전 연동)
+    // 7. 업무 통합 저장/조회 핵심 로직
     function loadTasks() {
         if (typeof StorageDB !== 'undefined') {
             const result = StorageDB.getTasks(TEAM_ID);
@@ -251,7 +247,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // 8. 업무 등록/수정 이벤트 바인딩 (StorageDB 엔진 사용)
+    // 8. 업무 등록/수정 이벤트 바인딩
     if (taskForm) {
         taskForm.addEventListener('submit', (e) => {
             e.preventDefault();
