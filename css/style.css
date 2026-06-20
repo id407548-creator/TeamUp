@@ -222,7 +222,7 @@ a:hover {
 }
 
 /* ==========================================
-   7. 공통 모달
+   7. 공통 모달 (스크립트 직접 display 변환 대응 최적화)
    ========================================== */
 .modal {
     position: fixed;
@@ -230,37 +230,39 @@ a:hover {
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(15, 23, 42, 0.4); /* 다크 슬레이트 투명 */
+    background: rgba(15, 23, 42, 0.4); 
     backdrop-filter: blur(8px);
-    display: flex;
+    -webkit-backdrop-filter: blur(8px);
+    display: none; /* js에서 직접 flex-none을 연동하므로 기본값 정리 */
     align-items: center;
     justify-content: center;
     z-index: 1000;
-    opacity: 0;
-    pointer-events: none;
     transition: opacity 0.25s ease;
-}
-
-.modal.active {
-    opacity: 1;
-    pointer-events: auto;
 }
 
 .modal-content {
     width: 90%;
     max-width: 500px;
     padding: 32px;
-    transform: translateY(20px);
-    transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-    background: white !important;
-}
-
-.modal.active .modal-content {
-    transform: translateY(0);
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
 }
 
 /* ==========================================
-   8. 푸터
+   8. 칸반 보드 및 태스크 카드 추가 보정 스타일
+   ========================================== */
+.task-card {
+    transition: var(--transition-smooth);
+    cursor: grab;
+}
+.task-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
+}
+
+/* ==========================================
+   9. 푸터
    ========================================== */
 footer {
     margin-top: auto;
@@ -273,7 +275,7 @@ footer {
 }
 
 /* ==========================================
-   9. 반응형 미디어 쿼리 (Responsive Mobile)
+   10. 반응형 미디어 쿼리 (Responsive Mobile)
    ========================================== */
 @media (max-width: 768px) {
     .container {
@@ -300,7 +302,6 @@ footer {
         padding: 24px 0 !important;
     }
 
-    /* 탭 메뉴 세로 나열 방지 */
     .tab-btn {
         padding: 10px 12px !important;
         font-size: 0.9rem !important;
