@@ -66,69 +66,38 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-// 팀 생성
-if (createTeamForm) {
-    createTeamForm.addEventListener('submit', (e) => {
+    // 팀 생성 (오류 수정 및 유효성 검사 순서 정렬)
+    if (createTeamForm) {
+        createTeamForm.addEventListener('submit', (e) => {
+            e.preventDefault();
 
-        e.preventDefault();
+            const name = document.getElementById('team-name').value.trim();
+            const subject = document.getElementById('team-subject').value.trim();
+            const description = document.getElementById('team-description').value.trim();
 
-        hideModalError();
+            console.log(name, subject, description);
 
-        const name =
-            document.getElementById('team-name').value.trim();
-
-        const subject =
-            document.getElementById('team-subject').value.trim();
-
-        const description =
-            document.getElementById('team-description').value.trim();
-
-        if (!name || !subject) {
-            showModalError('팀 이름과 과목명을 입력해주세요.');
-            return;
-        }
-
-        console.log('생성 시도');
-
-        const result = StorageDB.createTeam(
-            name,
-            subject,
-            description
-        );
-
-        console.log(result);
-
-        if (result.success) {
-            closeModal();
-            loadTeams();
-        } else {
-            showModalError(result.message);
-        }
-    });
-}
-
+            // 1. 데이터가 비어있는지 먼저 확인 (유효성 검사)
             if (!name || !subject) {
                 showModalError('팀 이름과 과목명을 입력해주세요.');
-                return;
+                return; // 필수 값이 없으면 여기서 실행 중단
             }
 
-            const result = StorageDB.createTeam(
-                name,
-                subject,
-                description
-            );
+            // 2. DB에 팀 생성 요청
+            const result = StorageDB.createTeam(name, subject, description);
+            console.log(result);
 
+            // 3. 결과에 따른 처리
             if (result.success) {
                 closeModal();
-                loadTeams();
+                loadTeams(); // 팀 목록 새로고침
             } else {
                 showModalError(result.message);
             }
-        });
+        }); // 괄호가 꼬여있던 부분을 정상적으로 닫아주었습니다.
     }
 
     function loadTeams() {
-
         const result = StorageDB.getTeams();
 
         if (!result.success) {
@@ -148,35 +117,24 @@ if (createTeamForm) {
     }
 
     function renderTeams(teams) {
-
         if (!teams || teams.length === 0) {
-
             teamListContainer.innerHTML = `
-                <div class="glass-panel"
-                     style="grid-column:1/-1;padding:60px;text-align:center;">
-
-                    <i class="fa-solid fa-folder-open"
-                       style="font-size:3rem;margin-bottom:20px;"></i>
-
+                <div class="glass-panel" style="grid-column:1/-1;padding:60px;text-align:center;">
+                    <i class="fa-solid fa-folder-open" style="font-size:3rem;margin-bottom:20px;"></i>
                     <h3>아직 생성된 프로젝트가 없습니다</h3>
-
                     <p style="margin-top:10px;color:var(--text-secondary);">
                         새 프로젝트를 만들어 협업을 시작해보세요.
                     </p>
                 </div>
             `;
-
             return;
         }
 
         teamListContainer.innerHTML = '';
 
         teams.forEach(team => {
-
             const card = document.createElement('div');
-
             card.className = 'glass-panel';
-
             card.style.padding = '24px';
             card.style.cursor = 'pointer';
 
@@ -209,14 +167,13 @@ if (createTeamForm) {
                     font-size:0.85rem;
                     color:var(--text-muted);
                 ">
-                    <span>팀원 ${team.memberCount}명</span>
-                    <span>${team.role}</span>
+                    <span>팀원 ${team.memberCount || 1}명</span>
+                    <span>${team.role || '팀원'}</span>
                 </div>
             `;
 
             card.addEventListener('click', () => {
-                window.location.href =
-                    `team.html?id=${team.id}`;
+                window.location.href = `team.html?id=${team.id}`;
             });
 
             teamListContainer.appendChild(card);
@@ -232,5 +189,6 @@ if (createTeamForm) {
             .replace(/'/g, '&#039;');
     }
 
+    // 페이지 로드 시 팀 목록 불러오기 실행
     loadTeams();
 });
