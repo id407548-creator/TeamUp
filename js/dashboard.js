@@ -1,33 +1,38 @@
 document.addEventListener('DOMContentLoaded', () => {
-    console.log("시작: dashboard.js 로드됨");
+    console.log("dashboard.js 로드 완료");
 
-    // 1. StorageDB 객체가 존재하는지 확인
+    // 1. StorageDB 체크
     if (typeof StorageDB === 'undefined') {
-        console.error("오류: storage.js가 로드되지 않았거나 StorageDB 객체가 없습니다! HTML에서 스크립트 순서를 확인하세요.");
+        console.error("StorageDB를 찾을 수 없습니다. storage.js가 올바르게 로드되었는지 확인하세요.");
         return;
     }
 
-    const session = StorageDB.getCurrentSession();
-    console.log("현재 세션 데이터:", session); // 콘솔에서 이 값이 null인지, 어떤 형태인지 확인 가능
+    // 예외 처리 적용하여 세션 가져오기
+    let session = null;
+    try {
+        session = StorageDB.getCurrentSession();
+        console.log("가져온 세션 데이터:", session);
+    } catch (e) {
+        console.error("세션을 가져오는 중 에러 발생:", e);
+    }
 
-    // 로그인 안 되어 있으면 로그인 페이지로
+    // 로그인 안 되어 있으면 로그인 페이지로 (테스트 중 튕기는걸 방지하려면 잠시 주석 처리해도 됨)
     if (!session) {
-        console.warn("세션 없음: login.html로 이동합니다.");
+        alert("로그인이 필요합니다.");
         window.location.href = "login.html";
         return;
     }
 
-    // 사용자 이름 표시
+    // 2. 사용자 이름 표시 (데이터 필드 호환성 확보)
     const userNameElement = document.getElementById('user-name');
     if (userNameElement) {
-        // 만약 session.displayName이 아니라 session.name 이라면 아래를 session.name으로 변경해야 합니다.
-        console.log("표시할 이름:", session.displayName || session.name);
-        userNameElement.textContent = session.displayName || session.name || "사용자";
-    } else {
-        console.error("오류: HTML에 id='user-name'인 태그가 없습니다.");
+        // displayName, name, username, userId 중 존재하는 값을 찾아서 '이다경'이 뜨도록 유도
+        const currentUserName = session.displayName || session.name || session.username || session.userId || "사용자";
+        userNameElement.textContent = currentUserName;
+        console.log("화면에 표시된 이름:", currentUserName);
     }
 
-    // --- 이하 팀 생성 관련 코드 (동일) ---
+    // DOM 엘리먼트 수집
     const openModalBtn = document.getElementById('open-create-team-modal');
     const closeModalBtn = document.getElementById('close-create-team-modal');
     const cancelModalBtn = document.getElementById('cancel-create-team');
@@ -52,14 +57,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function openModal() {
         hideModalError();
-        createTeamForm.reset();
-        createTeamModal.classList.add('active');
+        if (createTeamForm) createTeamForm.reset();
+        if (createTeamModal) createTeamModal.classList.add('active');
     }
 
     function closeModal() {
-        createTeamModal.classList.remove('active');
+        if (createTeamModal) createTeamModal.classList.remove('active');
     }
 
+    // 이벤트 리스너 안전하게 바인딩
     if (openModalBtn) openModalBtn.addEventListener('click', openModal);
     if (closeModalBtn) closeModalBtn.addEventListener('click', closeModal);
     if (cancelModalBtn) cancelModalBtn.addEventListener('click', closeModal);
@@ -70,6 +76,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // 팀 생성 프로세스
     if (createTeamForm) {
         createTeamForm.addEventListener('submit', (e) => {
             e.preventDefault();
@@ -83,34 +90,40 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
 
-            const result = StorageDB.createTeam(name, subject, description);
-            
-            if (result && result.success) {
-                closeModal();
-                loadTeams();
-            } else {
-                showModalError(result ? result.message : "팀 생성에 실패했습니다.");
+            try {
+                const result = StorageDB.createTeam(name, subject, description);
+                console.log("팀 생성 결과:", result);
+
+                if (result && result.success) {
+                    closeModal();
+                    loadTeams();
+                } else {
+                    showModalError(result ? result.message : "팀 생성에 실패했습니다.");
+                }
+            } catch (error) {
+                console.error("팀 생성 중 에러 발생:", error);
+                showModalError("서버/스토리지 오류가 발생했습니다.");
             }
         });
     }
 
     function loadTeams() {
         if (!teamListContainer) return;
-        const result = StorageDB.getTeams();
-
-        if (!result || !result.success) {
-            teamListContainer.innerHTML = `
-                <div class="glass-panel" style="padding:40px;text-align:center;">
-                    <p>${result ? result.message : "팀 목록을 불러오지 못했습니다."}</p>
-                </div>
-            `;
-            return;
-        }
-
-        renderTeams(result.teams);
-
-        if (badge) {
-            badge.textContent = `${result.teams.length}개`;
+        
+        try {
+            const result = StorageDB.getTeams();
+            if (!result || !result.success) {
+                teamListContainer.innerHTML = `
+                    <div class="glass-panel" style="padding:40px;text-align:center;">
+                        <p>${result ? result.message : "팀 목록을 불러오지 못했습니다."}</p>
+                    </div>
+                `;
+                return;
+            }
+            renderTeams(result.teams);
+            if (badge) badge.textContent = `${result.teams.length}개`;
+        } catch (error) {
+            console.error("팀 목록 로드 중 에러:", error);
         }
     }
 
