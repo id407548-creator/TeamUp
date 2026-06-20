@@ -1,5 +1,12 @@
 document.addEventListener('DOMContentLoaded', () => {
-    console.log("tasks.js 최종 버전 가동 (StorageDB 완전 연동 - 싱크 교정판)");
+    // 💡 교정 완료: StorageDB 엔진 로드 상태 원천 검증 가드
+    if (typeof StorageDB === 'undefined') {
+        console.error("StorageDB 엔진을 찾을 수 없습니다. db.js 로드 순서를 확인하세요.");
+        alert("시스템 핵심 엔진(StorageDB) 로드에 실패했습니다. 스크립트 배치 순서를 확인하세요.");
+        return;
+    }
+
+    console.log("tasks.js 최종 버전 가동 (StorageDB 완전 연동 - 엔진 검증 및 싱크 교정 완료)");
 
     // URL에서 team id 가져오기
     const urlParams = new URLSearchParams(window.location.search);
@@ -11,7 +18,7 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
     }
 
-    // 1. DOM 요소 바인딩
+    // DOM 요소 바인딩
     const addTaskBtn = document.getElementById('open-add-task-modal');
     const taskModal = document.getElementById('task-modal');
     const closeTaskModalBtns = document.querySelectorAll('.close-task-modal');
@@ -33,20 +40,18 @@ document.addEventListener('DOMContentLoaded', () => {
     const tabButtons = document.querySelectorAll('.tab-btn');
     const tasksSection = document.getElementById('tasks-section');
 
-    // 2. 프로젝트 상단 정보 조회 (StorageDB 연동)
+    // 프로젝트 상단 정보 조회
     function loadTeamInfo() {
-        if (typeof StorageDB !== 'undefined') {
-            const result = StorageDB.getTeamDetails(TEAM_ID);
-            if (result && result.success) {
-                const currentTeam = result.team;
-                if (document.getElementById('team-name-display')) document.getElementById('team-name-display').textContent = currentTeam.name;
-                if (document.getElementById('team-subject-display')) document.getElementById('team-subject-display').textContent = currentTeam.subject;
-                if (document.getElementById('team-description-display')) document.getElementById('team-description-display').textContent = currentTeam.description || '설명 없음';
-            }
+        const result = StorageDB.getTeamDetails(TEAM_ID);
+        if (result && result.success) {
+            const currentTeam = result.team;
+            if (document.getElementById('team-name-display')) document.getElementById('team-name-display').textContent = currentTeam.name;
+            if (document.getElementById('team-subject-display')) document.getElementById('team-subject-display').textContent = currentTeam.subject;
+            if (document.getElementById('team-description-display')) document.getElementById('team-description-display').textContent = currentTeam.description || '설명 없음';
         }
     }
 
-    // 3. 업무 추가/수정 모달 제어 (CSS 트랜지션 완벽 연동)
+    // 업무 추가/수정 모달 제어 (💡 교정 완료: CSS 트랜지션 클래스와 완벽 동기화)
     function openModal(mode = 'create', taskData = null) {
         if (!taskModal) return;
         if (taskForm) taskForm.reset();
@@ -60,7 +65,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (document.getElementById('task-title-input')) document.getElementById('task-title-input').value = taskData.title;
             if (document.getElementById('task-desc-input')) document.getElementById('task-desc-input').value = taskData.description || '';
             
-            // 💡 교정 완료: 명확한 ID 기반 다이렉트 매핑 처리로 실시간 풀림 방지
+            // 💡 교정 완료: 텍스트 파싱 대신 고유 ID 기반 다이렉트 매핑으로 풀림 현상 제거
             if (assigneeSelect) {
                 assigneeSelect.value = taskData.assignedTo ? taskData.assignedTo.toString() : '';
             }
@@ -70,7 +75,6 @@ document.addEventListener('DOMContentLoaded', () => {
             if (document.getElementById('task-status-input')) document.getElementById('task-status-input').value = 'Todo';
         }
         
-        // CSS 클래스와 디스플레이 타이밍 일치화
         taskModal.style.display = 'flex';
         setTimeout(() => taskModal.classList.add('active'), 10);
     }
@@ -80,7 +84,7 @@ document.addEventListener('DOMContentLoaded', () => {
         taskModal.classList.remove('active');
         setTimeout(() => {
             taskModal.style.display = 'none';
-        }, 250); // CSS transition 시간(0.25s) 동기화
+        }, 250); // CSS 애니메이션 시간(0.25s) 동기화
     }
 
     if (addTaskBtn) addTaskBtn.addEventListener('click', () => openModal('create'));
@@ -92,23 +96,21 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // 4. 팀원 초대 버튼 (StorageDB 등록 연동)
+    // 팀원 초대 버튼
     if (inviteMemberBtn) {
         inviteMemberBtn.addEventListener('click', () => {
             const memberIdInput = prompt("초대할 팀원의 아이디(Username)를 입력하세요:");
             if (memberIdInput && memberIdInput.trim() !== "") {
-                if (typeof StorageDB !== 'undefined') {
-                    const res = StorageDB.inviteMemberToTeam(TEAM_ID, memberIdInput);
-                    alert(res.message);
-                    if (res.success) {
-                        loadTeamMembers(); 
-                    }
+                const res = StorageDB.inviteMemberToTeam(TEAM_ID, memberIdInput);
+                alert(res.message);
+                if (res.success) {
+                    loadTeamMembers(); 
                 }
             }
         });
     }
 
-    // 5. 탭 메뉴 클릭 시 전환 제어
+    // 탭 메뉴 클릭 전환 제어
     tabButtons.forEach(button => {
         button.addEventListener('click', (e) => {
             tabButtons.forEach(btn => {
@@ -124,7 +126,6 @@ document.addEventListener('DOMContentLoaded', () => {
             button.style.fontWeight = 'bold';
 
             const clickedTabName = button.textContent.trim();
-            
             const schedulesSec = document.getElementById('schedules-section');
             const filesSec = document.getElementById('files-section');
 
@@ -147,23 +148,21 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // 6. 팀 멤버 로드 및 아바타 출력
+    // 팀 멤버 조회 및 셀렉트 박스 바인딩
     function loadTeamMembers() {
-        if (typeof StorageDB !== 'undefined') {
-            const result = StorageDB.getTeamMembers(TEAM_ID);
-            if (result && result.success) {
-                const members = result.members;
-                if (assigneeSelect) {
-                    assigneeSelect.innerHTML = '<option value="">담당자 없음 (미정)</option>';
-                    members.forEach(member => {
-                        const option = document.createElement('option');
-                        option.value = member.id; 
-                        option.textContent = `${member.displayName} (${member.role === 'creator' ? '팀장' : '팀원'})`;
-                        assigneeSelect.appendChild(option);
-                    });
-                }
-                renderMemberAvatars(members);
+        const result = StorageDB.getTeamMembers(TEAM_ID);
+        if (result && result.success) {
+            const members = result.members;
+            if (assigneeSelect) {
+                assigneeSelect.innerHTML = '<option value="">담당자 없음 (미정)</option>';
+                members.forEach(member => {
+                    const option = document.createElement('option');
+                    option.value = member.id; 
+                    option.textContent = `${member.displayName} (${member.role === 'creator' ? '팀장' : '팀원'})`;
+                    assigneeSelect.appendChild(option);
+                });
             }
+            renderMemberAvatars(members);
         }
     }
 
@@ -191,13 +190,11 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // 7. 업무 통합 저장/조회 핵심 로직
+    // 업무 통합 조회 핵심 로직
     function loadTasks() {
-        if (typeof StorageDB !== 'undefined') {
-            const result = StorageDB.getTasks(TEAM_ID);
-            if (result && result.success) {
-                renderTasks(result.tasks);
-            }
+        const result = StorageDB.getTasks(TEAM_ID);
+        if (result && result.success) {
+            renderTasks(result.tasks);
         }
     }
 
@@ -247,14 +244,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function deleteTask(taskId) {
         if (confirm('이 작업을 정말 삭제하시겠습니까?')) {
-            if (typeof StorageDB !== 'undefined') {
-                StorageDB.deleteTask(taskId);
-                loadTasks();
-            }
+            StorageDB.deleteTask(taskId);
+            loadTasks();
         }
     }
 
-    // 8. 업무 등록/수정 이벤트 바인딩
+    // 업무 등록/수정 이벤트 처리
     if (taskForm) {
         taskForm.addEventListener('submit', (e) => {
             e.preventDefault();
@@ -267,15 +262,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (!title) return;
 
-            if (typeof StorageDB !== 'undefined') {
-                if (taskId) {
-                    StorageDB.updateTask(taskId, title, description, assignedTo, null, status);
-                } else {
-                    StorageDB.createTask(TEAM_ID, title, description, assignedTo, null, status);
-                }
-                closeModal();
-                loadTasks();
+            if (taskId) {
+                StorageDB.updateTask(taskId, title, description, assignedTo, null, status);
+            } else {
+                StorageDB.createTask(TEAM_ID, title, description, assignedTo, null, status);
             }
+            closeModal();
+            loadTasks();
         });
     }
 
