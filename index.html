@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TeamUp - 대학교 팀 프로젝트 관리 시스템</title>
+    <!-- Google Fonts 및 아이콘 폰트 로드 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- 메인 CSS 파일 연결 -->
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+    <!-- 동적으로 삽입될 공통 내비게이션 바 -->
+    <div id="navbar-placeholder"></div>
+
+    <!-- 메인 콘텐츠 영역 -->
+    <main style="flex: 1; padding: 40px 0;">
+        <div class="container" style="max-width: 960px; text-align: center; margin-top: 20px;">
+            <!-- 영웅 구역 (Hero Section) -->
+            <div class="hero-section" style="margin-bottom: 60px; padding: 40px 20px;">
+                <h1 style="font-size: 3.2rem; line-height: 1.25; margin-bottom: 24px; background: linear-gradient(135deg, var(--text-primary) 30%, var(--primary) 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 850;">
+                    대학 생활의 팀플을<br>더 완벽하고 심플하게
+                </h1>
+                <p style="font-size: 1.15rem; color: var(--text-secondary); max-width: 620px; margin: 0 auto 36px; line-height: 1.8;">
+                    역할 분담, 칸반 보드, 공유 캘린더, 그리고 자료실까지.<br>
+                    조별 과제의 모든 협업 도구를 TeamUp에서 한눈에 관리하세요.
+                </p>
+                <div style="display: flex; gap: 16px; justify-content: center; flex-wrap: wrap;">
+                    <a href="register.html" class="btn btn-primary" style="padding: 14px 28px; font-size: 1rem;">
+                        <i class="fa-solid fa-arrow-right-to-bracket"></i> 지금 무료로 시작하기
+                    </a>
+                    <a href="#features" class="btn btn-secondary" style="padding: 14px 28px; font-size: 1rem;">
+                        기능 알아보기
+                    </a>
+                </div>
+            </div>
+
+            <!-- 주요 기능 그리드 (Features Section) -->
+            <div id="features" style="scroll-margin-top: 100px; margin-top: 40px;">
+                <h2 style="font-size: 2rem; margin-bottom: 40px; text-align: center; color: var(--text-primary);">조별 과제를 위한 올인원 솔루션</h2>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 28px; text-align: left;">
+                    
+                    <!-- 카드 1: 역할 분담 -->
+                    <div class="glass-panel" style="padding: 30px; background: white;">
+                        <div style="width: 50px; height: 50px; border-radius: 12px; background: rgba(79, 70, 229, 0.1); display: flex; align-items: center; justify-content: center; font-size: 1.5rem; color: var(--primary); margin-bottom: 20px;">
+                            <i class="fa-solid fa-list-check"></i>
+                        </div>
+                        <h3 style="font-size: 1.25rem; margin-bottom: 12px; color: var(--text-primary);">역할 분담 (Task)</h3>
+                        <p style="color: var(--text-secondary); font-size: 0.95rem; line-height: 1.6;">
+                            칸반 보드 형식으로 팀원별 할 일을 나누고 진행 상태(할 일, 진행 중, 완료)를 실시간으로 드래그하여 추적합니다.
+                        </p>
+                    </div>
+
+                    <!-- 카드 2: 일정 관리 -->
+                    <div class="glass-panel" style="padding: 30px; background: white;">
+                        <div style="width: 50px; height: 50px; border-radius: 12px; background: rgba(6, 182, 212, 0.1); display: flex; align-items: center; justify-content: center; font-size: 1.5rem; color: var(--secondary); margin-bottom: 20px;">
+                            <i class="fa-regular fa-calendar-days"></i>
+                        </div>
+                        <h3 style="font-size: 1.25rem; margin-bottom: 12px; color: var(--text-primary);">일정 공유 (Schedule)</h3>
+                        <p style="color: var(--text-secondary); font-size: 0.95rem; line-height: 1.6;">
+                            팀원 모두가 공유하는 인디고 테마 캘린더를 통해 회의 시간과 과제 제출 마감일을 직관적으로 확인합니다.
+                        </p>
+                    </div>
+
+                    <!-- 카드 3: 자료 공유 (모의 서비스 안내용으로 마크업 유지) -->
+                    <div class="glass-panel" style="padding: 30px; background: white;">
+                        <div style="width: 50px; height: 50px; border-radius: 12px; background: rgba(16, 185, 129, 0.1); display: flex; align-items: center; justify-content: center; font-size: 1.5rem; color: var(--success); margin-bottom: 20px;">
+                            <i class="fa-solid fa-people-carry-box"></i>
+                        </div>
+                        <h3 style="font-size: 1.25rem; margin-bottom: 12px; color: var(--text-primary);">협업 플랫폼 (Collaboration)</h3>
+                        <p style="color: var(--text-secondary); font-size: 0.95rem; line-height: 1.6;">
+                            대학생들을 위한 맞춤형 팀플 메이트! 로그인 한 번으로 조원들의 작업량과 회의 스케줄을 원스톱 체크하세요.
+                        </p>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- 푸터 -->
+    <footer>
+        <div class="container">
+            <p>&copy; 2026 TeamUp. All rights reserved. Designed for Premium Collaboration.</p>
+        </div>
+    </footer>
+
+    <!-- 로컬 스토리지 데이터베이스 및 공통 스크립트 연결 -->
+    <script src="js/storage.js"></script>
+    <script src="js/navbar.js"></script>
+</body>
+</html>

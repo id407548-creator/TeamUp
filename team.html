@@ -1,0 +1,711 @@
+{% extends 'base.html' %}
+
+{% block title %}팀 프로젝트 - TeamUp{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* ==========================================
+       1. 칸반 보드 레이아웃 (Indigo Light 테마에 최적화)
+       ========================================== */
+    .kanban-board {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 24px;
+        margin-top: 20px;
+    }
+    
+    .kanban-column {
+        background: rgba(255, 255, 255, 0.65);
+        backdrop-filter: blur(12px);
+        border: 1px solid var(--border-color);
+        border-radius: 16px;
+        padding: 20px;
+        min-height: 550px;
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
+    }
+
+    .kanban-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding-bottom: 14px;
+        border-bottom: 2px solid var(--border-color);
+    }
+
+    .column-title {
+        font-size: 1.05rem;
+        font-weight: 750;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-family: 'Outfit', sans-serif;
+    }
+
+    .task-count {
+        background: rgba(0, 0, 0, 0.05);
+        color: var(--text-secondary);
+        font-size: 0.8rem;
+        padding: 2px 10px;
+        border-radius: 12px;
+        font-weight: 700;
+    }
+
+    .kanban-list {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+        min-height: 200px;
+        transition: var(--transition-smooth);
+    }
+
+    /* 할 일 카드 스타일 */
+    .task-card {
+        background: var(--bg-card);
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+        padding: 18px;
+        cursor: grab;
+        transition: var(--transition-smooth);
+        box-shadow: 0 4px 10px rgba(15, 23, 42, 0.03);
+        position: relative;
+    }
+
+    .task-card:active {
+        cursor: grabbing;
+    }
+
+    .task-card.dragging {
+        opacity: 0.4;
+        border: 1px dashed var(--primary);
+        transform: scale(0.98);
+    }
+
+    .task-card:hover {
+        transform: translateY(-3px);
+        border-color: var(--primary-glow);
+        box-shadow: 0 10px 24px rgba(15, 23, 42, 0.07);
+    }
+
+    .task-title {
+        font-size: 1.05rem;
+        font-weight: 700;
+        margin-bottom: 8px;
+        color: var(--text-primary);
+        font-family: 'Inter', sans-serif;
+        padding-right: 30px; /* 수정/삭제 버튼 공간 확보 */
+    }
+
+    .task-desc {
+        font-size: 0.85rem;
+        color: var(--text-secondary);
+        margin-bottom: 16px;
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        line-height: 1.5;
+    }
+
+    .task-meta {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 0.8rem;
+        border-top: 1px solid rgba(0, 0, 0, 0.05);
+        padding-top: 12px;
+        color: var(--text-secondary);
+    }
+
+    .task-assignee {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        color: var(--primary);
+        font-weight: 600;
+    }
+
+    .task-duedate {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        font-weight: 500;
+    }
+
+    .task-actions {
+        position: absolute;
+        top: 18px;
+        right: 18px;
+        display: flex;
+        gap: 8px;
+        opacity: 0;
+        transition: opacity 0.2s ease;
+    }
+
+    .task-card:hover .task-actions {
+        opacity: 1;
+    }
+
+    .action-btn {
+        background: none;
+        border: none;
+        color: var(--text-muted);
+        cursor: pointer;
+        font-size: 0.85rem;
+        transition: var(--transition-smooth);
+    }
+
+    .action-btn:hover {
+        color: var(--text-primary);
+    }
+
+    .action-btn.delete:hover {
+        color: var(--danger);
+    }
+
+    .kanban-list.drag-over {
+        background: rgba(79, 70, 229, 0.04);
+        border-radius: 12px;
+    }
+
+    /* ==========================================
+       2. 캘린더 커스텀 CSS (Indigo Light 테마에 최적화)
+       ========================================== */
+    #calendar {
+        background: white;
+        border: 1px solid var(--border-color);
+        border-radius: 16px;
+        padding: 24px;
+        color: var(--text-primary);
+        box-shadow: var(--glass-shadow);
+    }
+
+    .fc {
+        --fc-border-color: rgba(0,0,0,0.06) !important;
+        --fc-button-bg-color: #ffffff !important;
+        --fc-button-border-color: rgba(0,0,0,0.08) !important;
+        --fc-button-text-color: var(--text-primary) !important;
+        --fc-button-active-bg-color: var(--primary) !important;
+        --fc-button-active-border-color: var(--primary) !important;
+        --fc-button-hover-bg-color: hsl(220, 20%, 97%) !important;
+        --fc-today-bg-color: rgba(79, 70, 229, 0.05) !important;
+        --fc-page-bg-color: transparent !important;
+        font-family: 'Inter', sans-serif;
+    }
+
+    .fc .fc-toolbar-title {
+        font-family: 'Outfit', sans-serif;
+        font-weight: 850;
+        font-size: 1.4rem !important;
+        background: linear-gradient(to right, var(--text-primary), var(--primary));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    .fc .fc-col-header-cell {
+        padding: 12px 0;
+        font-weight: 600;
+        color: var(--text-primary);
+        background: rgba(0,0,0,0.01);
+    }
+
+    .fc-daygrid-day-number {
+        color: var(--text-primary);
+        padding: 10px !important;
+        font-weight: 500;
+        font-size: 0.9rem;
+    }
+
+    .fc-day-sun .fc-daygrid-day-number, 
+    .fc-day-sun .fc-col-header-cell-cushion {
+        color: #ef4444 !important;
+    }
+
+    .fc-day-sat .fc-daygrid-day-number,
+    .fc-day-sat .fc-col-header-cell-cushion {
+        color: #3b82f6 !important;
+    }
+
+    .fc-event {
+        border: none !important;
+        padding: 4px 8px !important;
+        border-radius: 6px !important;
+        font-size: 0.82rem !important;
+        font-weight: 600 !important;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        cursor: pointer;
+        transition: transform 0.15s ease;
+    }
+
+    .fc-event:hover {
+        transform: translateY(-1px);
+        filter: brightness(0.95);
+    }
+
+    /* 컬러 칩 스타일 */
+    .color-picker-group {
+        display: flex;
+        gap: 12px;
+        margin-top: 8px;
+    }
+
+    .color-chip {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        cursor: pointer;
+        border: 2px solid transparent;
+        transition: var(--transition-smooth);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .color-chip input {
+        display: none;
+    }
+
+    .color-chip:hover {
+        transform: scale(1.1);
+    }
+
+    .color-chip input:checked + span {
+        display: block;
+        width: 12px;
+        height: 12px;
+        background: white;
+        border-radius: 50%;
+        box-shadow: 0 0 6px rgba(0,0,0,0.3);
+    }
+
+    .color-chip.active-chip {
+        border-color: var(--text-primary);
+    }
+
+    /* ==========================================
+       3. 자료 공유(Files) 전용 CSS
+       ========================================== */
+    .file-dropzone {
+        border: 2px dashed rgba(79, 70, 229, 0.3);
+        border-radius: 16px;
+        padding: 40px 20px;
+        text-align: center;
+        background: rgba(255, 255, 255, 0.5);
+        cursor: pointer;
+        transition: var(--transition-smooth);
+        margin-bottom: 30px;
+        box-shadow: var(--glass-shadow);
+    }
+
+    .file-dropzone:hover, .file-dropzone.dragover {
+        border-color: var(--primary);
+        background: rgba(79, 70, 229, 0.04);
+    }
+
+    .file-dropzone i {
+        font-size: 3rem;
+        color: var(--primary);
+        opacity: 0.6;
+        margin-bottom: 16px;
+        transition: var(--transition-smooth);
+    }
+
+    .file-dropzone:hover i {
+        opacity: 1;
+        transform: translateY(-4px);
+    }
+
+    /* 파일 리스트 테이블 */
+    .file-table {
+        width: 100%;
+        border-collapse: collapse;
+        text-align: left;
+        margin-top: 10px;
+    }
+
+    .file-table th, .file-table td {
+        padding: 16px;
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    .file-table th {
+        font-family: 'Outfit', sans-serif;
+        color: var(--text-primary);
+        font-weight: 700;
+        font-size: 0.95rem;
+    }
+
+    .file-table tbody tr {
+        transition: var(--transition-smooth);
+    }
+
+    .file-table tbody tr:hover {
+        background: rgba(79, 70, 229, 0.02);
+    }
+
+    .file-icon {
+        font-size: 1.25rem;
+        margin-right: 10px;
+    }
+
+    .file-icon.pdf { color: #ef4444; }
+    .file-icon.ppt { color: #f97316; }
+    .file-icon.image { color: #10b981; }
+
+    /* ==========================================
+       4. 탭 이동 버튼 커스텀 스타일
+       ========================================== */
+    .tab-btn {
+        background: none;
+        border: none;
+        color: var(--text-secondary);
+        padding: 12px 24px;
+        font-size: 1rem;
+        cursor: pointer;
+        border-bottom: 2px solid transparent;
+        font-weight: 600;
+        transition: var(--transition-smooth);
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .tab-btn:hover {
+        color: var(--primary);
+    }
+
+    .tab-btn.active {
+        color: var(--primary) !important;
+        border-bottom: 2px solid var(--primary) !important;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <!-- 팀 정보 헤더 -->
+    <div class="glass-panel" style="padding: 30px; margin-bottom: 40px; background: white; display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 20px;">
+        <div>
+            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 10px;">
+                <span id="team-subject-badge" style="font-size: 0.8rem; background: var(--primary-glow); color: var(--primary); padding: 4px 10px; border-radius: 20px; font-weight: 700;">
+                    과목 로딩 중...
+                </span>
+            </div>
+            <h1 id="team-title" style="font-size: 2.2rem; margin-bottom: 12px; font-family: 'Outfit'; color: var(--text-primary); font-weight: 850;">
+                팀 이름 로딩 중...
+            </h1>
+            <p id="team-desc" style="color: var(--text-secondary); font-size: 0.95rem; line-height: 1.6; max-width: 700px;">
+                설명을 로딩 중입니다.
+            </p>
+        </div>
+        
+        <!-- 팀원 초대 및 아바타 관리 -->
+        <div style="display: flex; gap: 16px; align-items: center; flex-wrap: wrap;">
+            <div id="team-members-avatars" style="display: flex; gap: -8px;">
+                <!-- 팀원 아바타 동적 로드 -->
+            </div>
+            <button id="open-invite-modal" class="btn btn-secondary" style="padding: 10px 18px; font-size: 0.9rem;">
+                <i class="fa-solid fa-user-plus"></i> 팀원 초대
+            </button>
+        </div>
+    </div>
+
+    <!-- 탭 네비게이션 -->
+    <div style="display: flex; border-bottom: 1px solid var(--border-color); margin-bottom: 30px; gap: 4px; overflow-x: auto; -webkit-overflow-scrolling: touch;">
+        <button class="tab-btn active" data-tab="tasks">
+            <i class="fa-solid fa-list-check"></i> 역할 분담 (Tasks)
+        </button>
+        <button class="tab-btn" data-tab="schedule">
+            <i class="fa-regular fa-calendar-days"></i> 일정 관리 (Schedules)
+        </button>
+        <button class="tab-btn" data-tab="files">
+            <i class="fa-solid fa-folder-open"></i> 자료 공유 (Files)
+        </button>
+    </div>
+
+    <!-- 탭 콘텐츠 구역 -->
+    <div id="tab-content">
+        <!-- 1. 태스크 관리 칸반 보드 -->
+        <div id="tab-tasks" class="tab-pane active-pane">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 12px;">
+                <h2 style="font-size: 1.4rem; color: var(--text-primary); font-weight: 750;">프로젝트 업무 현황</h2>
+                <button id="add-task-btn" class="btn btn-primary" style="padding: 10px 20px; font-size: 0.9rem;">
+                    <i class="fa-solid fa-plus"></i> 업무 추가
+                </button>
+            </div>
+            
+            <div class="kanban-board">
+                <div class="kanban-column" data-status="Todo">
+                    <div class="kanban-header">
+                        <span class="column-title" style="color: var(--text-secondary);">
+                            <i class="fa-solid fa-circle" style="font-size: 0.55rem; color: #94a3b8; margin-right: 4px;"></i> 시작 전
+                        </span>
+                        <span class="task-count" id="count-todo">0</span>
+                    </div>
+                    <div class="kanban-list" id="list-todo"></div>
+                </div>
+
+                <div class="kanban-column" data-status="InProgress">
+                    <div class="kanban-header">
+                        <span class="column-title" style="color: var(--primary);">
+                            <i class="fa-solid fa-circle" style="font-size: 0.55rem; color: var(--primary); margin-right: 4px;"></i> 진행 중
+                        </span>
+                        <span class="task-count" id="count-inprogress">0</span>
+                    </div>
+                    <div class="kanban-list" id="list-inprogress"></div>
+                </div>
+
+                <div class="kanban-column" data-status="Done">
+                    <div class="kanban-header">
+                        <span class="column-title" style="color: var(--success);">
+                            <i class="fa-solid fa-circle" style="font-size: 0.55rem; color: var(--success); margin-right: 4px;"></i> 완료
+                        </span>
+                        <span class="task-count" id="count-done">0</span>
+                    </div>
+                    <div class="kanban-list" id="list-done"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 2. 일정 관리 -->
+        <div id="tab-schedule" class="tab-pane" style="display: none;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+                <h2 style="font-size: 1.4rem; color: var(--text-primary); font-weight: 750;">팀 공동 일정</h2>
+                <button id="add-schedule-btn" class="btn btn-primary" style="padding: 10px 20px; font-size: 0.9rem;">
+                    <i class="fa-solid fa-calendar-plus"></i> 일정 추가
+                </button>
+            </div>
+            <div id="calendar"></div>
+        </div>
+
+        <!-- 3. 파일 공유 -->
+        <div id="tab-files" class="tab-pane" style="display: none;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+                <h2 style="font-size: 1.4rem; color: var(--text-primary); font-weight: 750;">팀 클라우드 자료실</h2>
+            </div>
+
+            <div class="file-dropzone" id="file-dropzone">
+                <input type="file" id="file-input" style="display: none;" multiple>
+                <i class="fa-solid fa-cloud-arrow-up"></i>
+                <h4 style="font-size: 1.1rem; margin-bottom: 8px; color: var(--text-primary); font-weight: 700;">마우스로 파일을 드래그하여 여기에 놓으세요</h4>
+                <p style="color: var(--text-secondary); font-size: 0.9rem; max-width: 500px; margin: 0 auto 12px;">
+                    또는 이곳을 클릭하여 컴퓨터에서 파일을 선택하세요.
+                </p>
+                <span style="font-size: 0.8rem; background: rgba(0,0,0,0.04); color: var(--text-secondary); padding: 4px 12px; border-radius: 20px; font-weight: 500;">
+                    지원 유형: PDF, PPT, PPTX, 이미지 (PNG, JPG, GIF 등) / 최대 16MB
+                </span>
+            </div>
+
+            <div class="glass-panel" style="padding: 24px; overflow-x: auto; background: white;">
+                <table class="file-table">
+                    <thead>
+                        <tr>
+                            <th style="width: 45%;">파일명</th>
+                            <th style="width: 15%;">크기</th>
+                            <th style="width: 15%;">업로드한 사람</th>
+                            <th style="width: 15%;">업로드 날짜</th>
+                            <th style="width: 10%; text-align: center;">작업</th>
+                        </tr>
+                    </thead>
+                    <tbody id="file-list-tbody">
+                        <tr>
+                            <td colspan="5" style="text-align: center; color: var(--text-muted); padding: 40px 0;">
+                                자료실 정보를 불러오는 중입니다...
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Task 등록 및 수정 모달 -->
+<div id="task-modal" class="modal">
+    <div class="modal-content glass-panel" style="max-width: 480px; border-radius: 20px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+            <h3 style="font-size: 1.35rem; color: var(--text-primary); font-weight: 750;" id="task-modal-title">업무 추가</h3>
+            <button type="button" class="close-task-modal" style="background: none; border: none; color: var(--text-secondary); cursor: pointer; font-size: 1.2rem;">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+
+        <form id="task-form">
+            <input type="hidden" id="task-id" name="task_id">
+            
+            <div class="form-group">
+                <label for="task-title-input" class="form-label">업무 제목</label>
+                <input type="text" id="task-title-input" name="title" class="form-control" placeholder="할 일 제목을 입력하세요" required>
+            </div>
+
+            <div class="form-group">
+                <label for="task-desc-input" class="form-label">상세 내용</label>
+                <textarea id="task-desc-input" name="description" class="form-control" rows="3" placeholder="어떤 작업인지 상세히 기술해 주세요"></textarea>
+            </div>
+
+            <div class="form-group">
+                <label for="task-assignee-input" class="form-label">담당자</label>
+                <select id="task-assignee-input" name="assigned_to" class="form-control">
+                    <option value="">담당자 없음 (미정)</option>
+                </select>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                <div class="form-group">
+                    <label for="task-duedate-input" class="form-label">마감일</label>
+                    <input type="date" id="task-duedate-input" name="due_date" class="form-control">
+                </div>
+                <div class="form-group">
+                    <label for="task-status-input" class="form-label">상태</label>
+                    <select id="task-status-input" name="status" class="form-control">
+                        <option value="Todo">시작 전</option>
+                        <option value="InProgress">진행 중</option>
+                        <option value="Done">완료</option>
+                    </select>
+                </div>
+            </div>
+
+            <div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 28px;">
+                <button type="button" class="btn btn-secondary close-task-modal">취소</button>
+                <button type="submit" class="btn btn-primary" id="task-submit-btn">저장</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Schedule 등록 및 수정 모달 -->
+<div id="schedule-modal" class="modal">
+    <div class="modal-content glass-panel" style="max-width: 480px; border-radius: 20px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+            <h3 style="font-size: 1.35rem; color: var(--text-primary); font-weight: 750;" id="schedule-modal-title">일정 추가</h3>
+            <button type="button" class="close-schedule-modal" style="background: none; border: none; color: var(--text-secondary); cursor: pointer; font-size: 1.2rem;">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+
+        <form id="schedule-form">
+            <input type="hidden" id="schedule-id" name="schedule_id">
+            
+            <div class="form-group">
+                <label for="schedule-title-input" class="form-label">일정 제목</label>
+                <input type="text" id="schedule-title-input" name="title" class="form-control" placeholder="회의, 마감일 등 일정 명칭 입력" required>
+            </div>
+
+            <div class="form-group">
+                <label for="schedule-desc-input" class="form-label">일정 상세 설명</label>
+                <textarea id="schedule-desc-input" name="description" class="form-control" rows="2" placeholder="일정 세부 내용을 작성하세요"></textarea>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                <div class="form-group">
+                    <label for="schedule-start-input" class="form-label">시작 일시</label>
+                    <input type="datetime-local" id="schedule-start-input" name="start_time" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label for="schedule-end-input" class="form-label">종료 일시</label>
+                    <input type="datetime-local" id="schedule-end-input" name="end_time" class="form-control" required>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">표시 색상</label>
+                <div class="color-picker-group">
+                    <label class="color-chip active-chip" style="background: #4F46E5;">
+                        <input type="radio" name="color" value="#4F46E5" checked>
+                        <span></span>
+                    </label>
+                    <label class="color-chip" style="background: #06b6d4;">
+                        <input type="radio" name="color" value="#06b6d4">
+                        <span></span>
+                    </label>
+                    <label class="color-chip" style="background: #10b981;">
+                        <input type="radio" name="color" value="#10b981">
+                        <span></span>
+                    </label>
+                    <label class="color-chip" style="background: #f59e0b;">
+                        <input type="radio" name="color" value="#f59e0b">
+                        <span></span>
+                    </label>
+                    <label class="color-chip" style="background: #ef4444;">
+                        <input type="radio" name="color" value="#ef4444">
+                        <span></span>
+                    </label>
+                </div>
+            </div>
+
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 32px;">
+                <button type="button" id="delete-schedule-btn" class="btn btn-secondary" style="color: var(--danger); border-color: rgba(239,68,68,0.2); display: none;">
+                    <i class="fa-solid fa-trash-can"></i> 삭제
+                </button>
+                <div style="display: flex; gap: 12px; margin-left: auto;">
+                    <button type="button" class="btn btn-secondary close-schedule-modal">취소</button>
+                    <button type="submit" class="btn btn-primary">저장</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    const TEAM_ID = "{{ team_id }}";
+    const CURRENT_USER_ID = parseInt("{{ session.get('user_id', 0) }}");
+</script>
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
+<script src="{{ url_for('static', filename='js/tasks.js') }}"></script>
+<script src="{{ url_for('static', filename='js/schedules.js') }}"></script>
+<script src="{{ url_for('static', filename='js/files.js') }}"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const tabBtns = document.querySelectorAll('.tab-btn');
+        const tabPanes = document.querySelectorAll('.tab-pane');
+        
+        tabBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                tabBtns.forEach(b => {
+                    b.classList.remove('active');
+                });
+                
+                btn.classList.add('active');
+                
+                const targetTab = btn.getAttribute('data-tab');
+                tabPanes.forEach(pane => {
+                    if (pane.id === `tab-${targetTab}`) {
+                        pane.style.display = 'block';
+                    } else {
+                        pane.style.display = 'none';
+                    }
+                });
+
+                if (targetTab === 'schedule' && window.teamCalendar) {
+                    window.teamCalendar.updateSize();
+                }
+                
+                // 자료 공유 탭 활성화 시 파일 목록 리프레시
+                if (targetTab === 'files' && window.refreshTeamFiles) {
+                    window.refreshTeamFiles();
+                }
+            });
+        });
+
+        // 팀 정보 로드
+        fetch(`/api/teams/details/${TEAM_ID}`)
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    document.getElementById('team-subject-badge').textContent = data.team.subject;
+                    document.getElementById('team-title').textContent = data.team.name;
+                    document.getElementById('team-desc').textContent = data.team.description || '설명이 없는 프로젝트입니다.';
+                } else {
+                    alert(data.message);
+                    window.location.href = '/dashboard';
+                }
+            })
+            .catch(err => console.error("Error loading team info:", err));
+    });
+</script>
+{% endblock %}
