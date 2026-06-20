@@ -1,0 +1,308 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;600;850&display=swap');
+
+/* ==========================================
+   1. 디자인 시스템 토큰 (Indigo Collaborator Theme)
+   ========================================== */
+:root {
+    /* Color Palette */
+    --bg-main: hsl(220, 33%, 97%);         /* 소프트 라이트 그레이 */
+    --bg-card: hsl(0, 0%, 100%);            /* 순백색 카드 */
+    --bg-card-hover: hsl(220, 40%, 99%);
+    --border-color: hsla(220, 20%, 85%, 0.6);
+    --border-glow: hsla(250, 70%, 55%, 0.15);
+    
+    --text-primary: hsl(224, 60%, 12%);      /* 다크 네이비 텍스트 */
+    --text-secondary: hsl(220, 15%, 40%);    /* 차분한 회색 텍스트 */
+    --text-muted: hsl(220, 10%, 60%);        /* 옅은 회색 텍스트 */
+    
+    /* Brand Colors */
+    --primary: hsl(250, 65%, 54%);          /* 트렌디한 인디고 퍼플 */
+    --primary-hover: hsl(250, 75%, 60%);
+    --primary-glow: hsla(250, 65%, 54%, 0.25);
+    
+    --secondary: hsl(190, 85%, 45%);        /* 스마트한 시안/민트 */
+    --secondary-hover: hsl(190, 95%, 50%);
+    
+    --success: hsl(142, 65%, 40%);
+    --danger: hsl(350, 75%, 55%);
+    --warning: hsl(38, 92%, 50%);
+    
+    /* Shadows & Effects */
+    --glass-bg: rgba(255, 255, 255, 0.75);
+    --glass-border: rgba(255, 255, 255, 0.5);
+    --glass-shadow: 0 8px 30px rgba(31, 38, 135, 0.05);
+    --transition-smooth: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ==========================================
+   2. 기본 초기화 & 글로벌 스타일
+   ========================================== */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background-color: var(--bg-main);
+    color: var(--text-primary);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow-x: hidden;
+    line-height: 1.6;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-family: 'Outfit', sans-serif;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+}
+
+a {
+    color: var(--primary);
+    text-decoration: none;
+    transition: var(--transition-smooth);
+}
+
+a:hover {
+    color: var(--primary-hover);
+}
+
+/* ==========================================
+   3. 글래스모피즘 & 레이아웃 컴포넌트
+   ========================================== */
+.glass-panel {
+    background: var(--glass-bg);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid var(--glass-border);
+    border-radius: 16px;
+    box-shadow: var(--glass-shadow);
+    transition: var(--transition-smooth);
+}
+
+.glass-panel:hover {
+    box-shadow: 0 12px 36px rgba(31, 38, 135, 0.08);
+    transform: translateY(-2px);
+}
+
+/* Container */
+.container {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 24px;
+}
+
+/* ==========================================
+   4. 버튼 스타일
+   ========================================== */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    border: 1px solid transparent;
+    transition: var(--transition-smooth);
+    gap: 8px;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, var(--primary), hsl(270, 60%, 55%));
+    color: white;
+    box-shadow: 0 4px 14px var(--primary-glow);
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px var(--primary-glow);
+    background: linear-gradient(135deg, var(--primary-hover), hsl(270, 70%, 60%));
+}
+
+.btn-secondary {
+    background: white;
+    border: 1px solid var(--border-color);
+    color: var(--text-secondary);
+    box-shadow: 0 2px 6px rgba(0,0,0,0.02);
+}
+
+.btn-secondary:hover {
+    background: hsl(220, 20%, 97%);
+    color: var(--text-primary);
+    transform: translateY(-2px);
+}
+
+/* ==========================================
+   5. 상단 내비게이션 바
+   ========================================== */
+.navbar {
+    height: 70px;
+    display: flex;
+    align-items: center;
+    border-bottom: 1px solid var(--border-color);
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(16px);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+.navbar .container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.brand {
+    font-size: 1.45rem;
+    font-weight: 850;
+    background: linear-gradient(to right, var(--primary), var(--secondary));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.nav-links {
+    display: flex;
+    gap: 20px;
+    align-items: center;
+    list-style: none;
+}
+
+.nav-item {
+    font-weight: 600;
+    font-size: 0.95rem;
+    color: var(--text-secondary);
+}
+
+.nav-item:hover {
+    color: var(--primary);
+}
+
+/* ==========================================
+   6. 입력 폼 스타일
+   ========================================== */
+.form-group {
+    margin-bottom: 20px;
+    text-align: left;
+}
+
+.form-label {
+    display: block;
+    margin-bottom: 8px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.form-control {
+    width: 100%;
+    padding: 12px 16px;
+    background: white;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    color: var(--text-primary);
+    font-size: 0.95rem;
+    outline: none;
+    transition: var(--transition-smooth);
+    box-shadow: inset 0 1px 2px rgba(0,0,0,0.02);
+}
+
+.form-control:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px var(--primary-glow);
+}
+
+/* ==========================================
+   7. 공통 모달
+   ========================================== */
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(15, 23, 42, 0.4); /* 다크 슬레이트 투명 */
+    backdrop-filter: blur(8px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s ease;
+}
+
+.modal.active {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.modal-content {
+    width: 90%;
+    max-width: 500px;
+    padding: 32px;
+    transform: translateY(20px);
+    transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    background: white !important;
+}
+
+.modal.active .modal-content {
+    transform: translateY(0);
+}
+
+/* ==========================================
+   8. 푸터
+   ========================================== */
+footer {
+    margin-top: auto;
+    padding: 24px 0;
+    border-top: 1px solid var(--border-color);
+    background: white;
+    text-align: center;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+}
+
+/* ==========================================
+   9. 반응형 미디어 쿼리 (Responsive Mobile)
+   ========================================== */
+@media (max-width: 768px) {
+    .container {
+        padding: 0 16px;
+    }
+    
+    .navbar {
+        height: auto;
+        padding: 12px 0;
+    }
+    
+    .navbar .container {
+        flex-direction: column;
+        gap: 12px;
+    }
+    
+    .nav-links {
+        width: 100%;
+        justify-content: center;
+        gap: 16px;
+    }
+
+    main {
+        padding: 24px 0 !important;
+    }
+
+    /* 탭 메뉴 세로 나열 방지 */
+    .tab-btn {
+        padding: 10px 12px !important;
+        font-size: 0.9rem !important;
+    }
+}
