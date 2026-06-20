@@ -66,37 +66,46 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // 팀 생성
-    if (createTeamForm) {
-        createTeamForm.addEventListener('submit', (e) => {
-    e.preventDefault();
+// 팀 생성
+if (createTeamForm) {
+    createTeamForm.addEventListener('submit', (e) => {
 
-    const name =
-        document.getElementById('team-name').value.trim();
+        e.preventDefault();
 
-    const subject =
-        document.getElementById('team-subject').value.trim();
+        hideModalError();
 
-    const description =
-        document.getElementById('team-description').value.trim();
+        const name =
+            document.getElementById('team-name').value.trim();
 
-    console.log(name, subject, description);
+        const subject =
+            document.getElementById('team-subject').value.trim();
 
-    const result = StorageDB.createTeam(
-        name,
-        subject,
-        description
-    );
+        const description =
+            document.getElementById('team-description').value.trim();
 
-    console.log(result);
+        if (!name || !subject) {
+            showModalError('팀 이름과 과목명을 입력해주세요.');
+            return;
+        }
 
-    if (result.success) {
-        closeModal();
-        loadTeams();
-    } else {
-        showModalError(result.message);
-    }
-});
+        console.log('생성 시도');
+
+        const result = StorageDB.createTeam(
+            name,
+            subject,
+            description
+        );
+
+        console.log(result);
+
+        if (result.success) {
+            closeModal();
+            loadTeams();
+        } else {
+            showModalError(result.message);
+        }
+    });
+}
 
             if (!name || !subject) {
                 showModalError('팀 이름과 과목명을 입력해주세요.');
