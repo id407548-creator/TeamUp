@@ -18,10 +18,7 @@
         <div style="display:flex; justify-content:space-between; align-items:center;">
 
             <div>
-                <h1>
-    안녕하세요, <span id="user-name"></span>님! 👋
-</h1>
-
+                <h1>안녕하세요, <span id="user-name"></span>님! 👋</h1>
                 <p style="color:var(--text-secondary);">
                     오늘도 팀원들과 함께 멋진 프로젝트를 완성해 보세요.
                 </p>
@@ -36,87 +33,46 @@
 
     <div style="display:flex; align-items:center; gap:10px; margin-bottom:20px;">
         <h2>진행 중인 팀 프로젝트</h2>
-
-        <span
-            id="teams-count-badge"
-            style="
-                background:#eef2ff;
-                padding:4px 10px;
-                border-radius:20px;
-            ">
-            0개
-        </span>
+        <span id="teams-count-badge" style="background:#eef2ff; padding:4px 10px; border-radius:20px;">0개</span>
     </div>
 
-    <div
-        id="team-list-container"
-        style="
-            display:grid;
-            grid-template-columns:repeat(auto-fill,minmax(320px,1fr));
-            gap:20px;
-        ">
+    <div id="team-list-container" style="display:grid; grid-template-columns:repeat(auto-fill,minmax(320px,1fr)); gap:20px;">
     </div>
 
 </div>
 
-<!-- 팀 생성 모달 -->
 <div id="create-team-modal" class="modal">
-
     <div class="modal-content glass-panel">
-
-        <h3>새 팀 만들기</h3>
+        
+        <div style="display:flex; justify-content:between; align-items:center; margin-bottom:20px;">
+            <h3 style="margin:0;">새 팀 만들기</h3>
+            <button id="close-create-team-modal" style="background:none; border:none; font-size:1.5rem; cursor:pointer; margin-left:auto;">&times;</button>
+        </div>
 
         <form id="create-team-form">
-
             <div class="form-group">
                 <label>팀 이름</label>
-                <input
-    type="text"
-    id="team-name"
-    name="name"
-    class="form-control"
-    required>
+                <input type="text" id="team-name" name="name" class="form-control" required>
             </div>
 
             <div class="form-group">
                 <label>과목명</label>
-                <input
-    type="text"
-    id="team-subject"
-    name="subject"
-    class="form-control"
-    required>
+                <input type="text" id="team-subject" name="subject" class="form-control" required>
             </div>
 
             <div class="form-group">
                 <label>설명</label>
-                <textarea
-    id="team-description"
-    name="description"
-    class="form-control"></textarea>
+                <textarea id="team-description" name="description" class="form-control"></textarea>
             </div>
 
-            <div id="modal-error-message"></div>
+            <div id="modal-error-message" style="display:none; color:red; margin-top:10px;"></div>
 
-            <div style="margin-top:20px;">
-                <button
-                    type="button"
-                    id="cancel-create-team"
-                    class="btn btn-secondary">
-                    취소
-                </button>
-
-                <button
-                    type="submit"
-                    class="btn btn-primary">
-                    만들기
-                </button>
+            <div style="margin-top:20px; display:flex; gap:10px; justify-content:flex-end;">
+                <button type="button" id="cancel-create-team" class="btn btn-secondary">취소</button>
+                <button type="submit" class="btn btn-primary">만들기</button>
             </div>
-
         </form>
-
     </div>
-
 </div>
 
 <script src="js/storage.js"></script>
