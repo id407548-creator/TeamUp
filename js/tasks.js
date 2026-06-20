@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
-    console.log("tasks.js 작동 시작");
+    console.log("tasks.js 최종 버전 가동");
 
     // URL에서 team id 가져오기
     const urlParams = new URLSearchParams(window.location.search);
@@ -29,9 +29,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const assigneeSelect = document.getElementById('task-assignee-input');
     const memberAvatarsContainer = document.getElementById('team-members-avatars');
 
+    // 추가 기능 버튼 및 탭 바인딩
+    const inviteMemberBtn = document.getElementById('invite-member-btn');
+    const tabButtons = document.querySelectorAll('.tab-btn');
+    const tasksSection = document.getElementById('tasks-section');
+
     let teamMembers = [];
 
-    // 상단 프로젝트 헤더 정보 로드하기
+    // 프로젝트 정보 채우기
     function loadTeamInfo() {
         if (typeof StorageDB !== 'undefined') {
             const result = StorageDB.getTeams();
@@ -46,15 +51,20 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // 2. 모달 열기/닫기 제어
+    // 2. 업무 추가/수정 모달 제어
     function openModal(mode = 'create', taskData = null) {
-        if (!taskModal) return;
+        if (!taskModal) {
+            console.error("task-modal 엘리먼트를 찾을 수 없습니다.");
+            return;
+        }
         if (taskForm) taskForm.reset();
-        document.getElementById('task-id').value = '';
+        
+        const idInput = document.getElementById('task-id');
+        if (idInput) idInput.value = '';
         
         if (mode === 'edit' && taskData) {
             if (taskModalTitle) taskModalTitle.textContent = '업무 수정';
-            document.getElementById('task-id').value = taskData.id;
+            if (idInput) idInput.value = taskData.id;
             document.getElementById('task-title-input').value = taskData.title;
             document.getElementById('task-desc-input').value = taskData.description || '';
             document.getElementById('task-assignee-input').value = taskData.assignee_name || '';
@@ -63,14 +73,17 @@ document.addEventListener('DOMContentLoaded', () => {
             if (taskModalTitle) taskModalTitle.textContent = '업무 추가';
             document.getElementById('task-status-input').value = 'Todo';
         }
-        taskModal.style.display = 'flex'; // 모달 표시
+        taskModal.style.display = 'flex'; // 대시보드와 동일한 flex 스타일로 띄우기
     }
 
     function closeModal() {
         if (taskModal) taskModal.style.display = 'none';
     }
 
-    if (addTaskBtn) addTaskBtn.addEventListener('click', () => openModal('create'));
+    if (addTaskBtn) {
+        addTaskBtn.addEventListener('click', () => openModal('create'));
+    }
+    
     closeTaskModalBtns.forEach(btn => btn.addEventListener('click', closeModal));
     
     if (taskModal) {
@@ -79,7 +92,51 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // 3. 팀 멤버 리스트업 및 아바타 생성
+    // 3. 팀원 초대 버튼 작동 구현
+    if (inviteMemberBtn) {
+        inviteMemberBtn.addEventListener('click', () => {
+            const memberName = prompt("초대할 팀원의 이름을 입력하세요:");
+            if (memberName && memberName.trim() !== "") {
+                alert(`${memberName.trim()} 님에게 초대 링크가 발송되었습니다! (정적 모킹 완료)`);
+                // 원한다면 여기에 teamMembers에 동적 push하는 로직을 넣을 수도 있습니다.
+            }
+        });
+    }
+
+    // 4. 탭 메뉴 클릭 시 전환 기능 작동 구현 (일정관리, 자료공유)
+    tabButtons.forEach(button => {
+        button.addEventListener('click', (e) => {
+            // 기존 활성화 클래스 제거
+            tabButtons.forEach(btn => {
+                btn.classList.remove('active');
+                btn.style.color = '#64748b';
+                btn.style.borderBottom = 'none';
+                btn.style.fontWeight = 'normal';
+            });
+
+            // 클릭한 탭 활성화 디자인 적용
+            button.classList.add('active');
+            button.style.color = '#4f46e5';
+            button.style.borderBottom = '2px solid #4f46e5';
+            button.style.fontWeight = 'bold';
+
+            const clickedTabName = button.textContent.trim();
+            
+            if (clickedTabName.includes("역할 분담")) {
+                if (tasksSection) tasksSection.style.display = 'block';
+            } else if (clickedTabName.includes("일정 관리")) {
+                if (tasksSection) tasksSection.style.display = 'none';
+                alert("일정 관리(Schedules) 페이지 준비 중입니다! (기능 연결 확인 완료)");
+                // 추후 js/schedules.js 연동 시 여기에 호출 함수를 넣습니다.
+            } else if (clickedTabName.includes("자료 공유")) {
+                if (tasksSection) tasksSection.style.display = 'none';
+                alert("자료 공유(Files) 페이지 준비 중입니다! (기능 연결 확인 완료)");
+                // 추후 js/files.js 연동 시 여기에 호출 함수를 넣습니다.
+            }
+        });
+    });
+
+    // 5. 팀 멤버 리스트업 및 아바타 생성
     function loadTeamMembers() {
         let sessionUser = "이다경";
         if (typeof StorageDB !== 'undefined' && StorageDB.getCurrentSession()) {
@@ -129,7 +186,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // 4. 로컬 태스크 저장/조회 핵심 로직
+    // 6. 로컬 태스크 저장/조회 핵심 로직
     function loadTasks() {
         const storageKey = `tasks_team_${TEAM_ID}`;
         const localTasks = localStorage.getItem(storageKey);
@@ -168,7 +225,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 </div>
             `;
 
-            // 수정/삭제 버튼 바인딩
             card.querySelector('.edit-btn').addEventListener('click', () => openModal('edit', task));
             card.querySelector('.delete-btn').addEventListener('click', () => deleteTask(task.id));
 
@@ -192,7 +248,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // 5. 폼 전송 이벤트
+    // 7. 폼 전송 이벤트 (업무 생성 및 수정 완료 처리)
     if (taskForm) {
         taskForm.addEventListener('submit', (e) => {
             e.preventDefault();
@@ -209,11 +265,9 @@ document.addEventListener('DOMContentLoaded', () => {
             let tasks = JSON.parse(localStorage.getItem(storageKey) || '[]');
 
             if (taskId) {
-                // 수정 모드
                 const idx = tasks.findIndex(t => String(t.id) === String(taskId));
                 if (idx > -1) tasks[idx] = { id: taskId, title, description, assignee_name, status };
             } else {
-                // 생성 모드
                 tasks.push({ id: Date.now().toString(), title, description, assignee_name, status });
             }
 
