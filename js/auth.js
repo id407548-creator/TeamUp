@@ -1,11 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
-    console.log("auth.js 로드 완료 (StorageDB 로그인/회원가입 엔진 가동)");
-
-    // 💡 StorageDB 엔진 로드 상태 안전망 확보
-    if (typeof StorageDB === 'undefined') {
-        console.error("StorageDB를 찾을 수 없습니다. storage.js 로드 순서를 확인하세요.");
-        return;
-    }
+    console.log("auth.js 가동");
 
     const loginForm = document.getElementById('login-form');
     const registerForm = document.getElementById('register-form');
@@ -25,7 +19,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // =========================
-    // 로그인 프로세스
+    // 로그인
     // =========================
     if (loginForm) {
         loginForm.addEventListener('submit', (e) => {
@@ -40,19 +34,22 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
 
-            const result = StorageDB.authLogin(username, password);
-
-            if (result && result.success) {
-                alert('로그인 성공!');
-                window.location.href = 'dashboard.html';
+            if (typeof StorageDB !== 'undefined') {
+                const result = StorageDB.authLogin(username, password);
+                if (result && result.success) {
+                    alert('로그인 성공!');
+                    window.location.href = 'dashboard.html';
+                } else {
+                    showError(result ? result.message : '로그인에 실패했습니다.');
+                }
             } else {
-                showError(result ? result.message : '로그인에 실패했습니다.');
+                showError('StorageDB 엔진을 찾을 수 없습니다.');
             }
         });
     }
 
     // =========================
-    // 회원가입 프로세스
+    // 회원가입
     // =========================
     if (registerForm) {
         registerForm.addEventListener('submit', (e) => {
@@ -64,9 +61,9 @@ document.addEventListener('DOMContentLoaded', () => {
             const email = registerForm.email.value.trim();
             const password = registerForm.password.value;
             
-            // 💡 일관성을 위해 폼 엘리먼트 내부에서 직접 value를 꺼내오도록 정리 (name="password_confirm" 기준)
-            const passwordConfirmField = registerForm.password_confirm || document.getElementById('password_confirm');
-            const passwordConfirm = passwordConfirmField ? passwordConfirmField.value : '';
+            // 💡 ID와 name 속성 양쪽 모두에서 가장 확실하게 값을 뽑아오도록 변경
+            const confirmElem = document.getElementById('password_confirm') || registerForm.password_confirm;
+            const passwordConfirm = confirmElem ? confirmElem.value : '';
 
             if (!username || !displayName || !email || !password) {
                 showError('모든 항목을 입력해주세요.');
@@ -83,13 +80,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
 
-            const result = StorageDB.authRegister(username, password, displayName, email);
-
-            if (result && result.success) {
-                alert('회원가입이 완료되었습니다.');
-                window.location.href = 'login.html';
-            } else {
-                showError(result ? result.message : '회원가입 중 오류가 발생했습니다.');
+            if (typeof StorageDB !== 'undefined') {
+                const result = StorageDB.authRegister(username, password, displayName, email);
+                if (result && result.success) {
+                    alert('회원가입이 완료되었습니다.');
+                    window.location.href = 'login.html';
+                } else {
+                    showError(result ? result.message : '회원가입에 실패했습니다.');
+                }
             }
         });
     }
