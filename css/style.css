@@ -222,7 +222,7 @@ a:hover {
 }
 
 /* ==========================================
-   7. 공통 모달 (스크립트 직접 display 변환 대응 최적화)
+   7. 공통 모달 (💡 교정 완료: 비동기 페이드 인 최적화)
    ========================================== */
 .modal {
     position: fixed;
@@ -233,11 +233,16 @@ a:hover {
     background: rgba(15, 23, 42, 0.4); 
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
-    display: none; /* js에서 직접 flex-none을 연동하므로 기본값 정리 */
+    display: none; 
     align-items: center;
     justify-content: center;
     z-index: 1000;
+    opacity: 0;
     transition: opacity 0.25s ease;
+}
+
+.modal.active {
+    opacity: 1;
 }
 
 .modal-content {
@@ -247,10 +252,16 @@ a:hover {
     background: white;
     border-radius: 12px;
     box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    transform: translateY(20px);
+    transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.modal.active .modal-content {
+    transform: translateY(0);
 }
 
 /* ==========================================
-   8. 칸반 보드 및 태스크 카드 추가 보정 스타일
+   8. 칸반 보드 및 태스크 카드 보정 스타일
    ========================================== */
 .task-card {
     transition: var(--transition-smooth);
