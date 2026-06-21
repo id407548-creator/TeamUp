@@ -254,8 +254,8 @@ const DB = {
     // 1. Create a Default Team
     const defaultTeam = {
       id: `team_${Date.now()}`,
-      name: '소프트웨어공학 3조',
-      description: 'TeamUp 서비스 개발 팀 프로젝트',
+      name: '조 이름을 적어주세요',
+      description: '프로젝트 명을 적어주세요',
       ownerId: user.id,
       createdAt: new Date().toISOString()
     };
@@ -263,9 +263,9 @@ const DB = {
 
     // 2. Create Dummy Users
     const dummyUsers = [
-      { id: 'user_dummy_1', name: '김철수', email: 'chul@univ.ac.kr', password: '123' },
-      { id: 'user_dummy_2', name: '이영희', email: 'young@univ.ac.kr', password: '123' },
-      { id: 'user_dummy_3', name: '박민수', email: 'min@univ.ac.kr', password: '123' }
+      { id: 'user_dummy_1', name: '팀원 이름을 적어주세요', email: '이메일을 적어주세요', password: '123' },
+      { id: 'user_dummy_2', name: '팀원 이름을 적어주세요', email: '이메일을 적어주세요', password: '123' },
+      { id: 'user_dummy_3', name: '팀원 이름을 적어주세요', email: '이메일을 적어주세요', password: '123' }
     ];
 
     const currentUsers = this.getUsers();
@@ -277,10 +277,10 @@ const DB = {
     this.set('users', currentUsers);
 
     // 3. Register Members
-    this.saveTeamMember({ id: `member_${Date.now()}_0`, teamId: defaultTeam.id, userId: user.id, role: '팀장' });
-    this.saveTeamMember({ id: `member_${Date.now()}_1`, teamId: defaultTeam.id, userId: 'user_dummy_1', role: '프론트엔드 개발자' });
-    this.saveTeamMember({ id: `member_${Date.now()}_2`, teamId: defaultTeam.id, userId: 'user_dummy_2', role: '기획 및 서기' });
-    this.saveTeamMember({ id: `member_${Date.now()}_3`, teamId: defaultTeam.id, userId: 'user_dummy_3', role: 'UI/UX 디자이너' });
+    this.saveTeamMember({ id: `member_${Date.now()}_0`, teamId: defaultTeam.id, userId: user.id, role: '역할을 정해주세요' });
+    this.saveTeamMember({ id: `member_${Date.now()}_1`, teamId: defaultTeam.id, userId: 'user_dummy_1', role: '역할을 정해주세요' });
+    this.saveTeamMember({ id: `member_${Date.now()}_2`, teamId: defaultTeam.id, userId: 'user_dummy_2', role: '역할을 정해주세요' });
+    this.saveTeamMember({ id: `member_${Date.now()}_3`, teamId: defaultTeam.id, userId: 'user_dummy_3', role: '역할을 정해주세요' });
 
     // 4. Seed Tasks
     const todayStr = new Date().toISOString().split('T')[0];
@@ -291,17 +291,17 @@ const DB = {
       {
         id: 'task_seed_1',
         teamId: defaultTeam.id,
-        title: '요구사항 정의서 작성',
-        description: 'TeamUp 서비스의 핵심 사용자 시나리오 및 화면 기획 정의서를 작성합니다.',
-        assigneeId: 'user_dummy_2',
+        title: '업무 제목',
+        description: '업무 설명을 적어주세요.',
+        assigneeId: '이름을 적어주세요',
         status: 'done',
         dueDate: threeDaysAgo
       },
       {
         id: 'task_seed_2',
         teamId: defaultTeam.id,
-        title: 'UI 와이어프레임 설계',
-        description: '피그마를 사용하여 깔끔한 노션/슬랙 스타일의 캘린더 및 보드 화면 와이어프레임을 그립니다.',
+        title: '업무 제목',
+        description: '업무 설명을 적어주세요.',
         assigneeId: user.id,
         status: 'doing',
         dueDate: todayStr
@@ -309,9 +309,9 @@ const DB = {
       {
         id: 'task_seed_3',
         teamId: defaultTeam.id,
-        title: '데이터베이스 및 스토리지 설계',
-        description: 'LocalStorage 메타데이터 구조와 대용량 파일 적재를 위한 IndexedDB 연동 코드를 구축합니다.',
-        assigneeId: 'user_dummy_1',
+        title: '업무 제목',
+        description: '업무 설명을 적어주세요.',
+        assigneeId: '이름을 적어주세요',
         status: 'todo',
         dueDate: twoDaysLater
       }
@@ -323,8 +323,8 @@ const DB = {
       {
         id: 'sched_seed_1',
         teamId: defaultTeam.id,
-        title: '👥 1차 오프라인 킥오프 회의',
-        description: '학교 도서관 세미나룸에서 역할 매칭 피드백 및 프로토타입 범위 확정.',
+        title: '👥 일정 제목을 적어주세요.',
+        description: '일정 내용을 설명해주세요.',
         date: threeDaysAgo,
         time: '14:00',
         type: 'meeting'
@@ -332,8 +332,8 @@ const DB = {
       {
         id: 'sched_seed_2',
         teamId: defaultTeam.id,
-        title: '🚩 중간 발표 과제 이메일 제출',
-        description: '지금까지 수집된 와이어프레임과 기획서를 종합하여 교수님께 pdf로 제출합니다.',
+        title: '🚩 일정 제목을 적어주세요',
+        description: '일정 내용을 설명해주세요.',
         date: twoDaysLater,
         time: '18:00',
         type: 'milestone'
@@ -364,7 +364,7 @@ const DB = {
           fileName: f.name,
           fileType: f.type,
           fileSize: f.size,
-          uploadedBy: 'user_dummy_2', // 이영희
+          uploadedBy: 'user_dummy_2', // 팀원1
           uploadDate: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString() // 1 day ago
         });
         // Save Binary
