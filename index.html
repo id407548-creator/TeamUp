@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TeamUp - 대학생 팀 프로젝트 협업 툴</title>
+  <!-- Google Fonts & Material Symbols -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- 알림 토스트 메시지 -->
+  <div id="toast-container"></div>
+
+  <!-- 1. 로그인/회원가입 섹션 (인증 화면) -->
+  <section id="auth-container" class="auth-container">
+    <div class="auth-card-wrapper">
+      <div class="auth-brand">
+        <span class="material-symbols-outlined brand-icon">group_work</span>
+        <h1 class="brand-name">TeamUp</h1>
+        <p class="brand-tagline">성공적인 대학 생활을 위한 캠퍼스 팀플 협업 툴</p>
+      </div>
+
+      <!-- 로그인 카드 -->
+      <div id="login-card" class="auth-card active">
+        <h2 class="auth-title">로그인</h2>
+        <form id="login-form" novalidate>
+          <div class="input-group">
+            <label for="login-email">학교 이메일</label>
+            <div class="input-wrapper">
+              <span class="material-symbols-outlined input-icon">mail</span>
+              <input type="email" id="login-email" placeholder="example@univ.ac.kr" required>
+            </div>
+            <span class="error-message" id="login-email-error"></span>
+          </div>
+
+          <div class="input-group">
+            <label for="login-password">비밀번호</label>
+            <div class="input-wrapper">
+              <span class="material-symbols-outlined input-icon">lock</span>
+              <input type="password" id="login-password" placeholder="비밀번호를 입력하세요" required>
+            </div>
+            <span class="error-message" id="login-password-error"></span>
+          </div>
+
+          <button type="submit" class="btn btn-primary btn-block">
+            <span>TeamUp 시작하기</span>
+            <span class="material-symbols-outlined btn-icon-right">arrow_forward</span>
+          </button>
+        </form>
+        <div class="auth-switch">
+          처음이신가요? <button id="to-signup-btn" class="btn-link">회원가입</button>
+        </div>
+      </div>
+
+      <!-- 회원가입 카드 -->
+      <div id="signup-card" class="auth-card">
+        <h2 class="auth-title">회원가입</h2>
+        <form id="signup-form" novalidate>
+          <div class="input-group">
+            <label for="signup-name">이름</label>
+            <div class="input-wrapper">
+              <span class="material-symbols-outlined input-icon">person</span>
+              <input type="text" id="signup-name" placeholder="이름을 입력하세요" required>
+            </div>
+            <span class="error-message" id="signup-name-error"></span>
+          </div>
+
+          <div class="input-group">
+            <label for="signup-email">학교 이메일</label>
+            <div class="input-wrapper">
+              <span class="material-symbols-outlined input-icon">mail</span>
+              <input type="email" id="signup-email" placeholder="example@univ.ac.kr" required>
+            </div>
+            <span class="error-message" id="signup-email-error"></span>
+          </div>
+
+          <div class="input-group">
+            <label for="signup-password">비밀번호</label>
+            <div class="input-wrapper">
+              <span class="material-symbols-outlined input-icon">lock</span>
+              <input type="password" id="signup-password" placeholder="8자 이상 입력하세요" required>
+            </div>
+            <span class="error-message" id="signup-password-error"></span>
+          </div>
+
+          <div class="input-group">
+            <label for="signup-confirm-password">비밀번호 확인</label>
+            <div class="input-wrapper">
+              <span class="material-symbols-outlined input-icon">lock_reset</span>
+              <input type="password" id="signup-confirm-password" placeholder="비밀번호를 한번 더 입력하세요" required>
+            </div>
+            <span class="error-message" id="signup-confirm-password-error"></span>
+          </div>
+
+          <button type="submit" class="btn btn-primary btn-block">
+            <span>회원가입 완료</span>
+            <span class="material-symbols-outlined btn-icon-right">how_to_reg</span>
+          </button>
+        </form>
+        <div class="auth-switch">
+          이미 계정이 있으신가요? <button id="to-login-btn" class="btn-link">로그인</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 2. 메인 애플리케이션 섹션 (로그인 후 대시보드) -->
+  <section id="app-container" class="app-container" style="display: none;">
+    <!-- 사이드바 내비게이션 -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <span class="material-symbols-outlined brand-icon">group_work</span>
+        <h2 class="brand-name">TeamUp</h2>
+      </div>
+
+      <nav class="sidebar-menu">
+        <ul>
+          <li>
+            <button class="nav-item active" data-target="dashboard">
+              <span class="material-symbols-outlined">dashboard</span>
+              <span>대시보드</span>
+            </button>
+          </li>
+          <li>
+            <button class="nav-item" data-target="teams">
+              <span class="material-symbols-outlined">groups</span>
+              <span>팀 관리</span>
+            </button>
+          </li>
+          <li>
+            <button class="nav-item" data-target="tasks">
+              <span class="material-symbols-outlined">assignment</span>
+              <span>역할 분담</span>
+            </button>
+          </li>
+          <li>
+            <button class="nav-item" data-target="schedules">
+              <span class="material-symbols-outlined">calendar_month</span>
+              <span>일정 관리</span>
+            </button>
+          </li>
+          <li>
+            <button class="nav-item" data-target="files">
+              <span class="material-symbols-outlined">folder_open</span>
+              <span>자료 공유</span>
+            </button>
+          </li>
+        </ul>
+      </nav>
+
+      <!-- 사용자 프로필 및 로그아웃 -->
+      <div class="sidebar-footer">
+        <div class="user-profile">
+          <div class="avatar" id="user-avatar">U</div>
+          <div class="user-info">
+            <span class="user-name" id="profile-user-name">사용자</span>
+            <span class="user-email" id="profile-user-email">user@univ.ac.kr</span>
+          </div>
+        </div>
+        <button id="logout-btn" class="btn-logout" title="로그아웃">
+          <span class="material-symbols-outlined">logout</span>
+          <span>로그아웃</span>
+        </button>
+      </div>
+    </aside>
+
+    <!-- 메인 콘텐츠 영역 -->
+    <main class="main-content">
+      <header class="main-header">
+        <div class="header-left">
+          <h2 id="current-view-title" class="view-title">대시보드</h2>
+          <!-- 팀 선택 셀렉터 -->
+          <div class="team-selector-wrapper" id="team-selector-container">
+            <span class="material-symbols-outlined select-lead-icon">grid_view</span>
+            <select id="team-selector" class="team-select">
+              <option value="">팀을 선택하세요</option>
+            </select>
+          </div>
+        </div>
+        <div class="header-right">
+          <div class="header-date">
+            <span class="material-symbols-outlined">today</span>
+            <span id="header-today-date">2026년 6월 21일 (일)</span>
+          </div>
+        </div>
+      </header>
+
+      <!-- 동적 콘텐츠 뷰 컨테이너 -->
+      <div class="content-body">
+        <!-- 2-1. 대시보드 뷰 -->
+        <div id="dashboard-view" class="view-panel active">
+          <!-- 환영 배너 -->
+          <div class="welcome-banner">
+            <div class="welcome-text">
+              <h3>안녕하세요, <span id="welcome-user-name" class="highlight">사용자</span>님! 👋</h3>
+              <p>학습 과제부터 발표 일정까지, TeamUp에서 조원들과 편리하게 소통하세요.</p>
+            </div>
+            <div class="welcome-badge">Campus Life</div>
+          </div>
+          
+          <!-- 요약 통계 그리드 -->
+          <div class="dashboard-grid">
+            <div class="card summary-card">
+              <div class="summary-icon-box bg-purple-light">
+                <span class="material-symbols-outlined text-purple">assignment</span>
+              </div>
+              <div class="summary-details">
+                <span class="summary-label">내 미완료 할 일</span>
+                <span class="summary-value" id="dash-my-tasks-count">0</span>
+              </div>
+            </div>
+            <div class="card summary-card">
+              <div class="summary-icon-box bg-blue-light">
+                <span class="material-symbols-outlined text-blue">calendar_month</span>
+              </div>
+              <div class="summary-details">
+                <span class="summary-label">이번 주 일정</span>
+                <span class="summary-value" id="dash-this-week-schedules-count">0</span>
+              </div>
+            </div>
+            <div class="card summary-card">
+              <div class="summary-icon-box bg-emerald-light">
+                <span class="material-symbols-outlined text-emerald">folder_open</span>
+              </div>
+              <div class="summary-details">
+                <span class="summary-label">공유된 자료</span>
+                <span class="summary-value" id="dash-files-count">0</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- 대시보드 위젯 상세 섹션 (2컬럼) -->
+          <div class="dashboard-details">
+            <!-- 1. 내가 담당한 업무 위젯 -->
+            <div class="card detail-section">
+              <div class="section-header">
+                <div class="section-title">
+                  <span class="material-symbols-outlined text-purple">checklist</span>
+                  <h3>내가 담당한 업무</h3>
+                </div>
+                <button class="btn-text-link" onclick="AppState.switchView('tasks')">전체보기</button>
+              </div>
+              <ul class="dashboard-list" id="dash-task-list">
+                <li class="list-empty">배정된 업무가 없습니다.</li>
+              </ul>
+            </div>
+
+            <!-- 2. 오늘 및 다가오는 일정 위젯 -->
+            <div class="card detail-section">
+              <div class="section-header">
+                <div class="section-title">
+                  <span class="material-symbols-outlined text-blue">event_note</span>
+                  <h3>다가오는 일정</h3>
+                </div>
+                <button class="btn-text-link" onclick="AppState.switchView('schedules')">캘린더보기</button>
+              </div>
+              <ul class="dashboard-list" id="dash-schedule-list">
+                <li class="list-empty">일정이 없습니다.</li>
+              </ul>
+            </div>
+
+            <!-- 3. 최근 업로드 자료 위젯 -->
+            <div class="card detail-section">
+              <div class="section-header">
+                <div class="section-title">
+                  <span class="material-symbols-outlined text-emerald">description</span>
+                  <h3>최근 업로드 자료</h3>
+                </div>
+                <button class="btn-text-link" onclick="AppState.switchView('files')">자료실 가기</button>
+              </div>
+              <ul class="dashboard-list" id="dash-file-list">
+                <li class="list-empty">공유된 파일이 없습니다.</li>
+              </ul>
+            </div>
+
+            <!-- 4. 팀 멤버 위젯 -->
+            <div class="card detail-section">
+              <div class="section-header">
+                <div class="section-title">
+                  <span class="material-symbols-outlined text-amber">groups</span>
+                  <h3>우리 팀원 목록</h3>
+                </div>
+              </div>
+              <ul class="dashboard-list" id="dash-member-list">
+                <li class="list-empty">팀원이 없습니다.</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- 2-2. 팀 관리 뷰 -->
+        <div id="teams-view" class="view-panel">
+          <div class="view-placeholder">
+            <span class="material-symbols-outlined">groups</span>
+            <h3>팀 관리 준비 중</h3>
+            <p>팀 생성 및 이메일 기반 팀원 초대 기능이 다음 단계에서 구현될 예정입니다.</p>
+          </div>
+        </div>
+
+        <!-- 2-3. 역할 분담 뷰 (Task Kanban Board) -->
+        <div id="tasks-view" class="view-panel">
+          <!-- 팀 미선택 시 경고 -->
+          <div class="no-team-selected" id="tasks-no-team">
+            <span class="material-symbols-outlined">info</span>
+            <h4>선택된 프로젝트 팀이 없습니다.</h4>
+            <p>상단 선택창에서 프로젝트 팀을 고르거나, <strong>팀 관리</strong>에서 새로운 팀을 구성하세요.</p>
+          </div>
+
+          <!-- 칸반 보드 -->
+          <div class="kanban-container" id="tasks-board-container" style="display: none;">
+            <div class="kanban-board">
+              <!-- Todo -->
+              <div class="kanban-column" data-status="todo">
+                <div class="column-header">
+                  <div class="column-title-wrapper">
+                    <span class="dot dot-todo"></span>
+                    <h4>시작 전</h4>
+                    <span class="column-count" id="count-todo">0</span>
+                  </div>
+                  <button class="btn-add-task" id="btn-add-task-todo" title="업무 추가">
+                    <span class="material-symbols-outlined">add</span>
+                  </button>
+                </div>
+                <div class="column-body" id="tasks-todo"></div>
+              </div>
+
+              <!-- Doing -->
+              <div class="kanban-column" data-status="doing">
+                <div class="column-header">
+                  <div class="column-title-wrapper">
+                    <span class="dot dot-doing"></span>
+                    <h4>진행 중</h4>
+                    <span class="column-count" id="count-doing">0</span>
+                  </div>
+                  <button class="btn-add-task" id="btn-add-task-doing" title="업무 추가">
+                    <span class="material-symbols-outlined">add</span>
+                  </button>
+                </div>
+                <div class="column-body" id="tasks-doing"></div>
+              </div>
+
+              <!-- Done -->
+              <div class="kanban-column" data-status="done">
+                <div class="column-header">
+                  <div class="column-title-wrapper">
+                    <span class="dot dot-done"></span>
+                    <h4>완료</h4>
+                    <span class="column-count" id="count-done">0</span>
+                  </div>
+                  <button class="btn-add-task" id="btn-add-task-done" title="업무 추가">
+                    <span class="material-symbols-outlined">add</span>
+                  </button>
+                </div>
+                <div class="column-body" id="tasks-done"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 2-4. 일정 관리 뷰 (Schedule Calendar) -->
+        <div id="schedules-view" class="view-panel">
+          <!-- 팀 미선택 시 경고 -->
+          <div class="no-team-selected" id="schedules-no-team">
+            <span class="material-symbols-outlined">info</span>
+            <h4>선택된 프로젝트 팀이 없습니다.</h4>
+            <p>상단 선택창에서 프로젝트 팀을 고르거나, <strong>팀 관리</strong>에서 새로운 팀을 구성하세요.</p>
+          </div>
+
+          <!-- 달력 -->
+          <div class="calendar-container" id="schedules-calendar-container" style="display: none;">
+            <div class="calendar-header-bar">
+              <div class="calendar-nav">
+                <button class="btn-cal-nav" id="cal-prev-btn">
+                  <span class="material-symbols-outlined">chevron_left</span>
+                </button>
+                <h3 id="calendar-month-year" class="calendar-title">2026년 6월</h3>
+                <button class="btn-cal-nav" id="cal-next-btn">
+                  <span class="material-symbols-outlined">chevron_right</span>
+                </button>
+                <button class="btn btn-today" id="cal-today-btn">오늘</button>
+              </div>
+              <button class="btn btn-primary" id="cal-add-btn">
+                <span class="material-symbols-outlined">add</span>
+                <span>일정 등록</span>
+              </button>
+            </div>
+
+            <div class="card calendar-card">
+              <div class="calendar-grid">
+                <div class="day-label sun">일</div>
+                <div class="day-label">월</div>
+                <div class="day-label">화</div>
+                <div class="day-label">수</div>
+                <div class="day-label">목</div>
+                <div class="day-label">금</div>
+                <div class="day-label sat">토</div>
+              </div>
+              <div class="calendar-days-grid" id="calendar-days-grid"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 2-5. 자료 공유 뷰 (Files Compartment) -->
+        <div id="files-view" class="view-panel">
+          <!-- 팀 미선택 시 경고 -->
+          <div class="no-team-selected" id="files-no-team">
+            <span class="material-symbols-outlined">info</span>
+            <h4>선택된 프로젝트 팀이 없습니다.</h4>
+            <p>상단 선택창에서 프로젝트 팀을 고르거나, <strong>팀 관리</strong>에서 새로운 팀을 구성하세요.</p>
+          </div>
+
+          <!-- 파일 보관함 본체 -->
+          <div class="files-container" id="files-board-container" style="display: none;">
+            <!-- 업로드 드롭존 -->
+            <div class="card file-dropzone" id="file-dropzone">
+              <span class="material-symbols-outlined dropzone-icon">cloud_upload</span>
+              <h4>공유할 파일을 여기에 끌어다 놓으세요</h4>
+              <p>또는 이곳을 클릭하여 컴퓨터에서 파일을 선택할 수 있습니다.</p>
+              <span class="dropzone-hint">지원 형식: PDF, PPT/PPTX, 이미지 (최대 50MB)</span>
+              <input type="file" id="file-input-hidden" style="display: none;" accept=".pdf, .ppt, .pptx, image/*" multiple>
+            </div>
+
+            <!-- 파일 리스트 테이블 -->
+            <div class="card file-list-card">
+              <div class="file-list-header">
+                <h3>공유 자료실 목록</h3>
+                <span class="column-count" id="files-count-badge">0</span>
+              </div>
+              <div class="table-responsive">
+                <table class="file-table">
+                  <thead>
+                    <tr>
+                      <th class="text-left">파일명</th>
+                      <th>용량</th>
+                      <th>유형</th>
+                      <th>등록자</th>
+                      <th>등록 일자</th>
+                      <th>동작</th>
+                    </tr>
+                  </thead>
+                  <tbody id="file-list-tbody">
+                    <!-- JS에서 동적으로 채워짐 -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </section>
+
+  <!-- 3. 모달 레이어 -->
+  <!-- 3-1. Task 모달 -->
+  <div id="task-modal" class="modal-overlay">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 id="task-modal-title">업무 추가</h3>
+        <button class="btn-close-modal" id="task-modal-close">
+          <span class="material-symbols-outlined">close</span>
+        </button>
+      </div>
+      <form id="task-form" novalidate>
+        <input type="hidden" id="task-id">
+        <input type="hidden" id="task-status-hidden">
+        
+        <div class="input-group">
+          <label for="task-title">업무명</label>
+          <div class="input-wrapper">
+            <span class="material-symbols-outlined input-icon">title</span>
+            <input type="text" id="task-title" placeholder="업무명을 입력하세요" required>
+          </div>
+          <span class="error-message" id="task-title-error"></span>
+        </div>
+
+        <div class="input-group">
+          <label for="task-desc">상세 설명</label>
+          <div class="input-wrapper">
+            <textarea id="task-desc" placeholder="상세 설명 및 요청 사항을 입력하세요" rows="3"></textarea>
+          </div>
+        </div>
+
+        <div class="modal-row">
+          <div class="input-group flex-1">
+            <label for="task-assignee">담당자</label>
+            <div class="input-wrapper">
+              <span class="material-symbols-outlined input-icon">person</span>
+              <select id="task-assignee" required></select>
+            </div>
+            <span class="error-message" id="task-assignee-error"></span>
+          </div>
+
+          <div class="input-group flex-1">
+            <label for="task-duedate">마감일</label>
+            <div class="input-wrapper">
+              <span class="material-symbols-outlined input-icon">event</span>
+              <input type="date" id="task-duedate" required>
+            </div>
+            <span class="error-message" id="task-duedate-error"></span>
+          </div>
+        </div>
+
+        <div class="input-group" id="task-status-group" style="display: none;">
+          <label for="task-status">진행 상태</label>
+          <div class="input-wrapper">
+            <span class="material-symbols-outlined input-icon">sync</span>
+            <select id="task-status">
+              <option value="todo">시작 전</option>
+              <option value="doing">진행 중</option>
+              <option value="done">완료</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-logout" id="btn-delete-task" style="display: none;">
+            <span class="material-symbols-outlined">delete</span>
+            <span>삭제</span>
+          </button>
+          <div class="footer-right">
+            <button type="button" class="btn btn-icon" id="btn-cancel-task">취소</button>
+            <button type="submit" class="btn btn-primary" id="btn-save-task">저장</button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- 3-2. Schedule 모달 -->
+  <div id="schedule-modal" class="modal-overlay">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 id="schedule-modal-title">일정 추가</h3>
+        <button class="btn-close-modal" id="schedule-modal-close">
+          <span class="material-symbols-outlined">close</span>
+        </button>
+      </div>
+      <form id="schedule-form" novalidate>
+        <input type="hidden" id="schedule-id">
+
+        <div class="input-group">
+          <label for="schedule-title">일정명</label>
+          <div class="input-wrapper">
+            <span class="material-symbols-outlined input-icon">edit_calendar</span>
+            <input type="text" id="schedule-title" placeholder="회의 주제 또는 제출 마감 일정을 입력하세요" required>
+          </div>
+          <span class="error-message" id="schedule-title-error"></span>
+        </div>
+
+        <div class="input-group">
+          <label for="schedule-desc">일정 상세</label>
+          <div class="input-wrapper">
+            <textarea id="schedule-desc" placeholder="상세 정보(장소, 링크, 의제 등)를 입력하세요" rows="2"></textarea>
+          </div>
+        </div>
+
+        <div class="modal-row">
+          <div class="input-group flex-1">
+            <label for="schedule-date">날짜</label>
+            <div class="input-wrapper">
+              <span class="material-symbols-outlined input-icon">calendar_today</span>
+              <input type="date" id="schedule-date" required>
+            </div>
+            <span class="error-message" id="schedule-date-error"></span>
+          </div>
+
+          <div class="input-group flex-1">
+            <label for="schedule-time">시간 (선택)</label>
+            <div class="input-wrapper">
+              <span class="material-symbols-outlined input-icon">schedule</span>
+              <input type="time" id="schedule-time">
+            </div>
+          </div>
+        </div>
+
+        <div class="input-group">
+          <label for="schedule-type">일정 유형</label>
+          <div class="input-wrapper">
+            <span class="material-symbols-outlined input-icon">category</span>
+            <select id="schedule-type">
+              <option value="meeting">👥 회의</option>
+              <option value="milestone">🚩 마일스톤 (발표/제출)</option>
+              <option value="assignment">✍️ 개인 과제</option>
+              <option value="etc">📌 기타</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-logout" id="btn-delete-schedule" style="display: none;">
+            <span class="material-symbols-outlined">delete</span>
+            <span>삭제</span>
+          </button>
+          <div class="footer-right">
+            <button type="button" class="btn btn-icon" id="btn-cancel-schedule">취소</button>
+            <button type="submit" class="btn btn-primary" id="btn-save-schedule">저장</button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
